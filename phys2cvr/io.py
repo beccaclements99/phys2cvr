@@ -467,10 +467,10 @@ def export_regressor(
 
     Parameters
     ----------
-    petco2hrf_shift : np.ndarray
+    petco2hrf_lagged : np.ndarray
         The regressors that needs to be exported, in its original sample
     freq : int
-        The frequency of the petco2hrf_shift (hence physiological data)
+        The frequency of the petco2hrf_lagged (hence physiological data)
     tr : float
         The tr of the fMRI timeseries at which to export.
     outname : str or path
@@ -485,7 +485,7 @@ def export_regressor(
     Returns
     -------
     petco2hrf_demean : np.ndarray
-        Interpolated version of `petco2hrf_shift` in the sampling of the fMRI data.
+        Interpolated version of `petco2hrf_lagged` in the sampling of the fMRI data.
     """
     petco2hrf_lagged = signal.resample_signal(petco2hrf_lagged, freq, 1 / tr, axis)
     petco2hrf_demean = petco2hrf_lagged - petco2hrf_lagged.mean(
