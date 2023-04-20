@@ -32,8 +32,10 @@ def save_bash_call(fname, outdir):
 
     Parameters
     ----------
-    outdir : str or path, optional
-        output directory
+    fname : str or path
+        Name of or path to functional file
+    outdir : str or path
+        Output directory
     """
     arg_str = ' '.join(sys.argv[1:])
     call_str = f'phys2cvr {arg_str}'
@@ -163,12 +165,12 @@ def phys2cvr(
         If `run_regression` is True, also run the lagged regression.
         Can be turned off.
         Default: True
-    r2model : 'full', 'partial' or 'intercept', optional
-        Submit the model of the R^2 the regression should return (hence, which
-        R^2 model the lag regression should be based on).
-        Possible options are 'full', 'partial', 'intercept'.
-        See `stats.regression` help to understand them.
-        Default: 'full'
+    r2model : {`full`, `partial`, `intercept`, `adj_full`, `adj_partial`, `adj_intercept`), optional
+        R^2 model the regression should return (and hence used for lag selection).
+        Potentially invariant if no orthogonalisation is introduced,
+        will change results with orthogonalisations.
+        See `stats.ols` help for more details.
+        Default: `full`
     lag_max : int or float, optional
         Limits (both positive and negative) of the temporal area to explore,
         expressed in seconds (e.g. ±9 seconds). Caution: this is not a pythonic
@@ -220,6 +222,11 @@ def phys2cvr(
         Run the convolution of the physiological trace.
         Can be turned off
         Default: True
+    response_function : {'hrf', 'rrf', 'crf'}, None, str, path, or 1D array-like, optional
+        Name of the response function to be used in the convolution of the regressor of
+        interest. Default is `hrf`.
+        For `rrf` and `crf`, `phys2denoise` must be installed (see extra installs).
+        See `signal.compute_petco2hrf` for details.
     quiet : bool, optional
         Return to screen only warnings and errors.
         Default: False
@@ -487,7 +494,7 @@ def phys2cvr(
 
     # If a regressor directory is not specified, compute the regressors.
     if regr_dir is None:
-        regr, regr_shifts = stats.get_regr(
+        regr, regr_shifts = stats.create_physio_regressor(
             func_avg,
             petco2hrf,
             tr,
@@ -510,7 +517,7 @@ def phys2cvr(
             regr_shifts = np.genfromtxt(os.path.join(regr_dir, 'co2_shifts.1D'))
         except OSError:
             LGR.warning(f'Regressor {outname}_petco2hrf.1D not found. Estimating it.')
-            regr, regr_shifts = stats.get_regr(
+            regr, regr_shifts = stats.create_physio_regressor(
                 func_avg,
                 petco2hrf,
                 tr,
