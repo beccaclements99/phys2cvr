@@ -36,14 +36,14 @@ def create_legendre(degree, length):
     Parameters
     ----------
     degree : int
-        Highest order desired.
+        Highest number of desired orders.
     length : int
-        Number of samples of the polynomials.
+        Length of the desired polynomials (number of samples).
 
     Returns
     -------
     legendre : np.ndarray
-        A `degree`*`length` array with all the polynomials up to order `degree`
+        A `degree`*`length` array which includes all the polynomials up to order `degree`.
     """
 
     def _bonnet(d, x):
@@ -74,7 +74,7 @@ def compute_bulk_shift(
     abs_xcorr=False,
 ):
     """
-    Compute bulk shift of regressor.
+    Compute (initial) bulk shift of regressor.
 
     Parameters
     ----------
@@ -121,12 +121,12 @@ def compute_bulk_shift(
     elif trial_len and not n_trials:
         LGR.warning(
             'The length of trial was specified, but the number of '
-            'trials was not. Using all trials for bulk shift estimation'
+            'trials was not. Using all available trials for bulk shift estimation'
         )
     elif not trial_len and n_trials:
         LGR.warning(
             'The number of trials was specified, but the length of '
-            'trial was not. Using all trials for bulk shift estimation'
+            'trial was not. Using all available trials for bulk shift estimation'
         )
     else:
         LGR.info('Using all trials for bulk shift estimation.')
@@ -159,8 +159,8 @@ def compute_bulk_shift(
     # This shouldn't happen, but still check
     if optshift + func_upsampled.shape[0] > len(petco2hrf):
         raise Exception(
-            f'The found optimal shift {optshift / freq} removes too many samples to '
-            'continue. This error should not be possible.'
+            f'The identified optimal shift {optshift / freq} removes too many samples to '
+            'continue.'
         )
 
     return optshift
@@ -178,7 +178,7 @@ def create_fine_shift_regressors(
     legacy=False,
 ):
     """
-    Compute fine shifts.
+    Compute fine shifts to further optimize shifts.
 
     Parameters
     ----------
@@ -258,46 +258,46 @@ def create_physio_regressor(
     Parameters
     ----------
     func_avg : np.ndarray
-        Functional timeseries (1D)
+        Average functional timeseries (1D)
     petco2hrf : np.ndarray
-        Regressor of interest
+        Regressor of interest (e.g., CO2 regressor)
     tr : str, int, or float
-        TR of timeseries
+        Repetition time (TR) of timeseries
     freq : str, int, or float
         Sample frequency of petco2hrf
     outname : list or path
-        Path to output directory for regressors.
+        Path to output directory for computed regressors.
     lag_max : int or float, optional
-        Limits (both positive and negative) of the temporal area to explore,
+        Limits (both positive and negative) for the estimated temporal lag,
         expressed in seconds.
-        Default: 9 (i.e. ±9 seconds)
+        Default: 9 (i.e., -9 to +9 seconds)
     trial_len : str or int, optional
-        Length of each single trial for tasks that have more than one
-        (E.g. BreathHold, CO2 challenges, ...)
+        Length of each individual trial for timeseries which include more than one trial
+        (e.g., multiple BreathHold trials, trials within CO2 challenges, ...)
         Used to improve cross correlation estimation.
         Default: None
     n_trials : str or int, optional
-        Number of trials in the task.
+        Number of trials within the timeseries.
         Default: None
     ext : str, optional
-        Extension to be used for the exported regressors.
+        Extension to be used for the exported regressors (e.g., .txt, .csv)
     lagged_regression : bool, optional
         Estimate regressors for each possible lag of `petco2hrf`.
-        If True, the maximum number of regressors will be `(freq*lag_max*2)+1`
     legacy : bool, optional
-        If True, exclude the upper lag limit from the regression estimation.
-        If True, the maximum number of regressors will be `(freq*lag_max*2)`
+        If True, exclude the upper (positive) lag limit from the regression estimation,
+        i.e., the maximum number of regressors will be `(freq*lag_max*2)`
+        If False, the maximum number of regressors will be `(freq*lag_max*2)+1`
     abs_xcorr : bool, optional
         If True, the cross correlation will consider the maximum absolute
-        correlation, i.e. if a negative correlation is higher than the highest
-        positive, the negative correlation will be chosen instead.
+        correlation, i.e., if a negative correlation is stronger than the strongest
+        positive, the negative correlation will be used.
     skip_xcorr : bool, optional
         If True, skip the cross correlation step.
 
     Returns
     -------
     petco2hrf_demean : np.ndarray
-        The central, demeaned petco2hrf regressor.
+        The demeaned petco2hrf regressor, central in time (not shifted).
     petco2hrf_lagged : np.ndarray
         The other shifted versions of the regressor.
     """
@@ -346,10 +346,10 @@ def create_physio_regressor(
         LGR.warning(
             'The generation of lagged regressors was requested, '
             'but the maximum lag was not specified. Skipping '
-            'lagged regressor generation.'
+            'the generation of lagged regressors.'
         )
     else:
-        LGR.info('Skipping lag regressors generation.')
+        LGR.info('Skipping the generation of lagged regressors.')
 
     return petco2hrf_demean, petco2hrf_lagged
 
