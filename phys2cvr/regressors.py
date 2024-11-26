@@ -104,19 +104,19 @@ def compute_bulk_shift(
     optshift : int
         The index of optimal shifting computed via Xcorr
     """
-    first_tp, last_tp = 0, -1
+    first_tp, n_shifts = 0, None
 
     if trial_len and n_trials:
         # If both are specified, disregard two extreme _trial from matching.
         LGR.info(f'Specified {n_trials} trials lasting {trial_len} seconds')
-        if n_trials > 2:
-            LGR.info('Ignoring first trial to improve first bulk shift estimation')
+        if n_trials > 3:
+            LGR.info('Ignoring first trial to improve bulk shift estimation')
             first_tp = int(trial_len * freq)
         else:
             LGR.info('Using all trials for bulk shift estimation')
-        if n_trials > 3:
-            LGR.info('Ignoring last trial to improve first bulk shift estimation')
-            last_tp = first_tp * (n_trials - 1)
+        if n_trials > 4:
+            LGR.info('Ignoring last trial to improve bulk shift estimation')
+            n_shifts = first_tp * (n_trials - 2)
 
     elif trial_len and not n_trials:
         LGR.warning(
@@ -132,12 +132,13 @@ def compute_bulk_shift(
         LGR.info('Using all trials for bulk shift estimation.')
 
     # Preparing breathhold and CO2 trace for Xcorr
-    func_cut = func_upsampled[first_tp:last_tp]
-    petco2hrf_cut = petco2hrf[:last_tp]
+    func_cut = func_upsampled[first_tp:]
     _, optshift, xcorr = x_corr(
-        func_cut, petco2hrf_cut, n_shifts=None, offset=first_tp, abs_xcorr=abs_xcorr
+        func_cut, petco2hrf, n_shifts=n_shifts, offset=first_tp, abs_xcorr=abs_xcorr
     )
-    LGR.info(f'Cross correlation estimated bulk shift at {optshift / freq} seconds')
+    LGR.info(
+        f'Cross correlation has estimated a bulk shift of {optshift / freq} seconds'
+    )
     # Export estimated optimal shift in seconds
     with open(f'{outname}_optshift.1D', 'w') as f:
         print(f'{(optshift / freq):.4f}', file=f)
