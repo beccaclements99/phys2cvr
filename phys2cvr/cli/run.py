@@ -38,7 +38,8 @@ def _get_parser():
         help=(
             'Complete path (absolute or relative) and name '
             'of the file containing fMRI signal. This file '
-            'can be a nifti file or a 1D txt file.'
+            'can be a nifti-like file, a gifti file, a .mat file, or a txt-like file. '
+            'Any filetype supported by nibabel should be supported.'
         ),
         required=True,
     )
@@ -128,7 +129,7 @@ def _get_parser():
             'Complete path (absolute or relative) and name '
             'of the file containing CO2 signal (or equivalent '
             'physiological trace to compute the regressor). '
-            'This file can be a 1D txt file or a .phys file '
+            'This file can be a 1D txt-like file, a .mat file, or a .phys file '
             'from peakdet.\n If nothing is specified, the '
             'average timeseries of the mask will be used '
             'as regressor.'
