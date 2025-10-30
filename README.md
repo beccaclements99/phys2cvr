@@ -9,7 +9,7 @@ phys2cvr
 [![Auto Release](https://img.shields.io/badge/release-auto.svg?style=flat&colorA=888888&colorB=9B065A&label=auto&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACzElEQVR4AYXBW2iVBQAA4O+/nLlLO9NM7JSXasko2ASZMaKyhRKEDH2ohxHVWy6EiIiiLOgiZG9CtdgG0VNQoJEXRogVgZYylI1skiKVITPTTtnv3M7+v8UvnG3M+r7APLIRxStn69qzqeBBrMYyBDiL4SD0VeFmRwtrkrI5IjP0F7rjzrSjvbTqwubiLZffySrhRrSghBJa8EBYY0NyLJt8bDBOtzbEY72TldQ1kRm6otana8JK3/kzN/3V/NBPU6HsNnNlZAz/ukOalb0RBJKeQnykd7LiX5Fp/YXuQlfUuhXbg8Di5GL9jbXFq/tLa86PpxPhAPrwCYaiorS8L/uuPJh1hZFbcR8mewrx0d7JShr3F7pNW4vX0GRakKWVk7taDq7uPvFWw8YkMcPVb+vfvfRZ1i7zqFwjtmFouL72y6C/0L0Ie3GvaQXRyYVB3YZNE32/+A/D9bVLcRB3yw3hkRCdaDUtFl6Ykr20aaLvKoqIXUdbMj6GFzAmdxfWx9iIRrkDr1f27cFONGMUo/gRI/jNbIMYxJOoR1cY0OGaVPb5z9mlKbyJP/EsdmIXvsFmM7Ql42nEblX3xI1BbYbTkXCqRnxUbgzPo4T7sQBNeBG7zbAiDI8nWfZDhQWYCG4PFr+HMBQ6l5VPJybeRyJXwsdYJ/cRnlJV0yB4ZlUYtFQIkMZnst8fRrPcKezHCblz2IInMIkPzbbyb9mW42nWInc2xmE0y61AJ06oGsXL5rcOK1UdCbEXiVwNXsEy/6+EbaiVG8eeEAfxvaoSBnCH61uOD7BS1Ul8ESHBKWxCrdyd6EYNKihgEVrwOAbQruoytuBYIFfAc3gVN6iawhjKyNCEpYhVJXgbOzARyaU4hCtYizq5EI1YgiUoIlT1B7ZjByqmRWYbwtdYjoWoN7+LOIQefIqKawLzK6ID69GGpQgwhhEcwGGUzfEPAiPqsCXadFsAAAAASUVORK5CYII=)](https://github.com/intuit/auto)
 
 <!-- [![See the documentation at: https://nigsp.readthedocs.io](https://img.shields.io/badge/docs-read%20latest-informational?style=flat&logo=readthedocs)](https://nigsp.readthedocs.io/en/latest/?badge=latest) -->
-[![Latest DOI](https://zenodo.org/badge/357980417.svg)](https://zenodo.org/badge/latestdoi/357980417)
+[![Latest DOI](https://zenodo.org/badge/357980417.svg)](https://doi.org/10.5281/zenodo.5559756)
 [![Licensed Apache 2.0](https://img.shields.io/github/license/smoia/phys2cvr?style=flat)](https://github.com/smoia/phys2cvr/blob/master/LICENSE)
 
 <!-- [![Codecov](https://img.shields.io/codecov/c/gh/MIPlabCH/nigsp?style=flat&label=codecov&logo=codecov)](https://codecov.io/gh/MIPLabCH/nigsp)
@@ -69,6 +69,12 @@ For basic installation, simply run:
 pip install phys2cvr
 ```
 
+#### Extras installation:
+If you want to use extra features (currently just loading matlab files), run instead:
+```bash
+pip install phys2cvr[matlab]
+```
+
 ### Clone from Github / install without `pip`
 
 :exclamation::exclamation::exclamation: Please note that `phys2cvr` is continuously deployed, i.e. the latest feature available are immediately released on PyPI.
@@ -103,6 +109,10 @@ git config remote.pushDefault origin
 # Install package with pip using the developer mode and the `[dev]` label
 # You might need to use pip3 depending on how you set up your system
 pip install -e .[dev]
+
+# Initialise and run once pre-commit
+pre-commit install
+pre-commit run --all
 ```
 If you make changes that you consider fundamental/interesting for the whole community, feel free to open a PR!
 
@@ -148,7 +158,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 License
 -------
 
-Copyright 2021, Stefano Moia.
+Copyright 2021-2025, Stefano Moia.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
