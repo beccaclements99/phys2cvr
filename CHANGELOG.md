@@ -1,3 +1,15 @@
+# 0.20.1 (Thu Oct 30 2025)
+
+#### 🐛 Bug Fix
+
+- fix: add extra installation for matlab files and update readme ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.20.0 (Thu Oct 30 2025)
 
 #### 🚀 Enhancement
