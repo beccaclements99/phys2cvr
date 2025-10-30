@@ -14,12 +14,13 @@ import os
 import sys
 from copy import deepcopy
 
+import nibabel as nib
 import numpy as np
 from peakdet.io import load_physio
 
 from phys2cvr import _version, io, signal, stats
 from phys2cvr.cli.run import _check_opt_conf, _get_parser
-from phys2cvr.io import EXT_1D, EXT_NIFTI
+from phys2cvr.io import EXT_ARRAY
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
@@ -304,9 +305,8 @@ def phys2cvr(
     LGR.info(f'Currently running phys2cvr version {version_number}')
     LGR.info(f'Input file is {fname_func}')
 
-    # Check func type and read it
-    func_is_1d = io.check_ext(EXT_1D, fname_func)
-    func_is_nifti = io.check_ext(EXT_NIFTI, fname_func)
+    # Check if func is 1d and read it
+    func_is_1d = io.check_ext(EXT_ARRAY, fname_func)
 
     # Check that all input values have right type
     tr = io.if_declared_force_type(tr, 'float', 'tr')
@@ -342,8 +342,15 @@ def phys2cvr(
                 'Provided functional signal, but no TR specified! '
                 'Rerun specifying the TR'
             )
-    elif func_is_nifti:
-        func, dmask, img = io.load_nifti_get_mask(fname_func, dim=4)
+    else:
+        try:
+            func, dmask, img = io.load_nifti_get_mask(fname_func, dim=4)
+        except nib.filebasedimages.ImageFileError:
+            raise NotImplementedError(
+                f'{fname_func} file type is not supported yet, or '
+                'the extension was not specified.'
+            )
+
         if len(func.shape) < 4:
             raise ValueError(f'Provided functional file {fname_func} is not a 4D file!')
         # Read TR or declare its overwriting
@@ -392,12 +399,6 @@ def phys2cvr(
             LGR.info(f'Obtaining average signal in {roiref}')
             func_avg = func[roi].mean(axis=0)
 
-    else:
-        raise NotImplementedError(
-            f'{fname_func} file type is not supported yet, or '
-            'the extension was not specified.'
-        )
-
     if fname_co2 is None:
         LGR.info(f'Computing "CVR" (approximation) maps using {fname_func} only')
         if func_is_1d:
@@ -429,7 +430,7 @@ def phys2cvr(
             petco2hrf = signal.resample_signal(petco2hrf, 1 / tr, freq)
     else:
         co2_is_phys = io.check_ext('.phys', fname_co2)
-        co2_is_1d = io.check_ext(EXT_1D, fname_co2)
+        co2_is_1d = io.check_ext(EXT_ARRAY, fname_co2)
 
         if co2_is_1d:
             if fname_pidx:
@@ -516,7 +517,7 @@ def phys2cvr(
             )
 
     # Run internal regression if required and possible!
-    if func_is_nifti and run_regression:
+    if not func_is_1d and run_regression:
         LGR.info('Running regression!')
 
         # Change dimensions in image header before export
