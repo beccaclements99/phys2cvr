@@ -1,3 +1,25 @@
+# 0.20.0 (Thu Oct 30 2025)
+
+#### 🚀 Enhancement
+
+- Massively increase I/O filetype support [#130](https://github.com/smoia/phys2cvr/pull/130) ([@smoia](https://github.com/smoia))
+
+#### 🏠 Internal
+
+- Add auto labeler workflow [#129](https://github.com/smoia/phys2cvr/pull/129) ([@smoia](https://github.com/smoia))
+- Bump actions/setup-python from 5 to 6 [#127](https://github.com/smoia/phys2cvr/pull/127) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- [pre-commit.ci] pre-commit autoupdate [#125](https://github.com/smoia/phys2cvr/pull/125) ([@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]) [@smoia](https://github.com/smoia))
+- Bump actions/checkout from 4 to 5 [#128](https://github.com/smoia/phys2cvr/pull/128) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- Setup Ruff for linting and add bots for automatic updates [#126](https://github.com/smoia/phys2cvr/pull/126) ([@smoia](https://github.com/smoia))
+
+#### Authors: 3
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot])
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.19.0 (Mon May 05 2025)
 
 #### 🚀 Enhancement
