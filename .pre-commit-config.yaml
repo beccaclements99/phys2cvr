@@ -33,7 +33,7 @@ repos:
       - id: ruff
         name: ruff linter
         args: [--fix]
-        files: peakdet
+        files: phys2cvr
       - id: ruff-format
         name: ruff formatter
-        files: peakdet
+        files: phys2cvr
