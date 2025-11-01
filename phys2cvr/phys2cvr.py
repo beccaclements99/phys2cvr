@@ -44,7 +44,7 @@ def save_bash_call(fname, outdir):
     log_path = os.path.join(outdir, 'logs')
     os.makedirs(log_path, exist_ok=True)
     isotime = datetime.datetime.now().strftime('%Y-%m-%dT%H%M%S')
-    fname, _ = io.check_ext('.nii.gz', os.path.basename(fname), remove=True)
+    _, fname, _ = io.check_ext('.nii.gz', os.path.basename(fname), remove=True)
     f = open(os.path.join(log_path, f'p2c_call_{fname}_{isotime}.sh'), 'a')
     f.write(f'#!bin/bash \n{call_str}')
     f.close()
@@ -305,8 +305,8 @@ def phys2cvr(
     LGR.info(f'Currently running phys2cvr version {version_number}')
     LGR.info(f'Input file is {fname_func}')
 
-    # Check if func is 1d and read it
-    func_is_1d = io.check_ext(EXT_ARRAY, fname_func)
+    # Check if func is 1d, save its extension in any case, and read it
+    func_is_1d, _, fname_ext = io.check_ext(EXT_ARRAY, fname_func, remove=True)
 
     # Check that all input values have right type
     tr = io.if_declared_force_type(tr, 'float', 'tr')
@@ -429,8 +429,8 @@ def phys2cvr(
             LGR.info(f'Resampling the average fMRI timeseries at {freq}Hz')
             petco2hrf = signal.resample_signal(petco2hrf, 1 / tr, freq)
     else:
-        co2_is_phys = io.check_ext('.phys', fname_co2)
-        co2_is_1d = io.check_ext(EXT_ARRAY, fname_co2)
+        co2_is_phys, _ = io.check_ext('.phys', fname_co2)
+        co2_is_1d, _ = io.check_ext(EXT_ARRAY, fname_co2)
 
         if co2_is_1d:
             if fname_pidx:
@@ -522,8 +522,8 @@ def phys2cvr(
 
         # Change dimensions in image header before export
         LGR.info('Prepare output image')
-        fname_out_func, _ = io.check_ext(
-            '.nii.gz', os.path.basename(fname_func), remove=True
+        _, fname_out_func, _ = io.check_ext(
+            fname_ext, os.path.basename(fname_func), remove=True
         )
         fname_out_func = os.path.join(outdir, fname_out_func)
         newdim = deepcopy(img.header['dim'])
@@ -593,12 +593,14 @@ def phys2cvr(
             beta = beta / float(scale_factor)
         # Scale beta by scale factor while exporting (useful to transform V in mmHg)
         LGR.info('Export CVR and T-stat of simple regression')
-        io.export_nifti(beta, oimg, f'{fname_out_func}_cvr_simple')
-        io.export_nifti(tstat, oimg, f'{fname_out_func}_tstat_simple')
+        io.export_nifti(beta, oimg, f'{fname_out_func}_cvr_simple{fname_ext}')
+        io.export_nifti(tstat, oimg, f'{fname_out_func}_tstat_simple{fname_ext}')
 
         if debug:
             LGR.debug('Export R^2 volume of simple regression')
-            io.export_nifti(r_square, oimg, f'{fname_out_func}_r_square_simple')
+            io.export_nifti(
+                r_square, oimg, f'{fname_out_func}_r_square_simple{fname_ext}'
+            )
 
         if (
             lagged_regression
@@ -739,10 +741,16 @@ def phys2cvr(
                     oimg_all = deepcopy(img)
                     oimg_all.header['dim'] = newdim_all
                     io.export_nifti(
-                        r_square_all, oimg_all, f'{fname_out_func}_r_square_all'
+                        r_square_all,
+                        oimg_all,
+                        f'{fname_out_func}_r_square_all{fname_ext}',
                     )
-                    io.export_nifti(tstat_all, oimg_all, f'{fname_out_func}_tstat_all')
-                    io.export_nifti(beta_all, oimg_all, f'{fname_out_func}_beta_all')
+                    io.export_nifti(
+                        tstat_all, oimg_all, f'{fname_out_func}_tstat_all{fname_ext}'
+                    )
+                    io.export_nifti(
+                        beta_all, oimg_all, f'{fname_out_func}_beta_all{fname_ext}'
+                    )
 
                 # Find the right lag for CVR estimation
                 lag_idx = np.argmax(r_square_all, axis=-1)
@@ -764,11 +772,11 @@ def phys2cvr(
             else:
                 beta = beta / float(scale_factor)
 
-            io.export_nifti(beta, oimg, f'{fname_out_func}_cvr')
-            io.export_nifti(tstat, oimg, f'{fname_out_func}_tstat')
+            io.export_nifti(beta, oimg, f'{fname_out_func}_cvr{fname_ext}')
+            io.export_nifti(tstat, oimg, f'{fname_out_func}_tstat{fname_ext}')
             if not lag_map:
-                io.export_nifti(lag, oimg, f'{fname_out_func}_lag')
-                io.export_nifti(lag_rel, oimg, f'{fname_out_func}_lag_mkrel')
+                io.export_nifti(lag, oimg, f'{fname_out_func}_lag{fname_ext}')
+                io.export_nifti(lag_rel, oimg, f'{fname_out_func}_lag_mkrel{fname_ext}')
 
     elif run_regression:
         LGR.warning(

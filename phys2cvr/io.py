@@ -138,10 +138,10 @@ def check_ext(all_ext, fname, scan=False, remove=False):
     obj_return = [has_ext]
 
     if remove:
-        if has_ext:
-            obj_return += [fname[: -len(ext)], ext]  # case insensitive solution
-        else:
-            obj_return += [fname, None]
+        obj_return += [
+            fname[: -len(ext)],
+            None if ext == '' else ext,
+        ]  # case insensitive solution
     else:
         obj_return += [fname]
 
