@@ -1,3 +1,15 @@
+# 0.20.2 (Sat Nov 01 2025)
+
+#### 🐛 Bug Fix
+
+- fix: Fix broken export ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.20.1 (Thu Oct 30 2025)
 
 #### 🐛 Bug Fix
