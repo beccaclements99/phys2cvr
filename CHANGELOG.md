@@ -1,3 +1,21 @@
+# 0.20.3 (Tue Nov 04 2025)
+
+#### 🐛 Bug Fix
+
+- Force all new matrices to be created as zeros to avoid background and number formatting issues. [#132](https://github.com/smoia/phys2cvr/pull/132) ([@smoia](https://github.com/smoia) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
+
+#### 🏠 Internal
+
+- Bump actions/labeler from 5 to 6 [#131](https://github.com/smoia/phys2cvr/pull/131) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+
+#### Authors: 3
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot])
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.20.2 (Sat Nov 01 2025)
 
 #### 🐛 Bug Fix
