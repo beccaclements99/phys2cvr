@@ -1,3 +1,15 @@
+# 0.21.0 (Tue Nov 04 2025)
+
+#### 💥 Breaking Change during development
+
+- Refactor cross correlation code for simplification. [#133](https://github.com/smoia/phys2cvr/pull/133) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.20.3 (Tue Nov 04 2025)
 
 #### 🐛 Bug Fix
