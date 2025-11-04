@@ -622,14 +622,15 @@ def regression(
     betas, tstats, r_square = ols(
         Ymat.T, Xmat, r2model='full', residuals=False, demean=False
     )
+
     if debug:
-        # debug should eport betas, tstats, r_square
+        # debug should export betas, tstats, r_square
         pass
 
     # Assign betas, Rsquare and tstats to new volume
-    bout = mask * 1.0
-    tout = mask * 1.0
-    rout = mask * 1.0
+    bout = np.zeros(mask.shape)
+    tout = np.zeros(mask.shape)
+    rout = np.zeros(mask.shape)
     bout[mask] = betas[-1, :]
     tout[mask] = tstats[-1, :]
     rout[mask] = r_square
