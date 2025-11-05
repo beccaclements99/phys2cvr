@@ -1,3 +1,15 @@
+# 0.23.1 (Wed Nov 05 2025)
+
+#### 🐛 Bug Fix
+
+- Fix petco2hrf call in CLI [#137](https://github.com/smoia/phys2cvr/pull/137) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.23.0 (Wed Nov 05 2025)
 
 #### 🚀 Enhancement
