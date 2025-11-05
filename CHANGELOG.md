@@ -2,7 +2,7 @@
 
 #### 🚀 Enhancement
 
-- Allow specifying a mode for the convolution of petco2, imporve convolution plots, and force co2 trace to be 1D [#134](https://github.com/smoia/phys2cvr/pull/134) ([@smoia](https://github.com/smoia) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
+- Allow specifying a mode for the convolution of petco2, improve convolution plots, and force co2 trace to be 1D [#134](https://github.com/smoia/phys2cvr/pull/134) ([@smoia](https://github.com/smoia) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
 
 #### Authors: 2
 
