@@ -80,7 +80,8 @@ def phys2cvr(
     scale_factor=None,
     lag_map=None,
     regr_dir=None,
-    run_conv=True,
+    comp_petco2hrf=True,
+    response_function='hrf',
     quiet=False,
     debug=False,
 ):
@@ -215,7 +216,7 @@ def phys2cvr(
         Directory containing pre-generated lagged regressors, useful
         to (re-)run a GLM analysis.
         Default: None
-    run_conv : bool, optional
+    comp_petco2hrf : bool, optional
         Run the convolution of the physiological trace.
         Can be turned off
         Default: True
@@ -436,7 +437,7 @@ def phys2cvr(
             if fname_pidx:
                 pidx = np.genfromtxt(fname_pidx)
                 pidx = pidx.astype(int)
-            elif run_conv:
+            elif comp_petco2hrf:
                 raise NameError(
                     f'{fname_co2} file is a text file, but no '
                     'file containing its peaks was provided. '
@@ -474,10 +475,16 @@ def phys2cvr(
         outname = os.path.join(outdir, basename_co2)
 
         # Unless user asks to skip this step, convolve the end tidal signal.
-        if run_conv is False:
+        if comp_petco2hrf is False:
+            LGR.info(
+                'Skipping computation of PetCO2 trace (did you provide a previously '
+                'computed version instead of raw CO2 data?)'
+            )
             petco2hrf = co2
         else:
-            petco2hrf = signal.convolve_petco2(co2, pidx, freq, outname)
+            petco2hrf = signal.compute_petco2hrf(
+                co2, pidx, freq, outname, response_function
+            )
 
     # If a regressor directory is not specified, compute the regressors.
     if regr_dir is None:
