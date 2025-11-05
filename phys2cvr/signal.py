@@ -154,16 +154,16 @@ def convolve_petco2(co2, pidx, freq, outname, mode='full'):
     # Extract PETco2
     hrf = create_hrf(freq)
     nx = np.linspace(0, co2.size, co2.size)
-    f = spint.interp1d(pidx, co2[pidx], fill_value="extrapolate")
+    f = spint.interp1d(pidx, co2[pidx], fill_value='extrapolate')
     petco2 = f(nx)
 
     # Plot PETco2
     plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.title("CO2 and PetCO2")
-    plt.plot(co2, "-", petco2, "-")
+    plt.title('CO2 and PetCO2')
+    plt.plot(co2, '-', petco2, '-')
     plt.legend(['CO2', 'PetCO2'])
     plt.tight_layout()
-    plt.savefig(f"{outname}_petco2.png", dpi=SET_DPI)
+    plt.savefig(f'{outname}_petco2.png', dpi=SET_DPI)
     plt.close()
 
     # Demean and export
@@ -177,13 +177,13 @@ def convolve_petco2(co2, pidx, freq, outname, mode='full'):
     )
 
     plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.title("PetCO2 and convolved PetCO2 (PetCO2hrf)")
-    plt.plot(petco2hrf, "-", petco2, "-")
+    plt.title('PetCO2 and convolved PetCO2 (PetCO2hrf)')
+    plt.plot(petco2hrf, '-', petco2, '-')
     plt.tight_layout()
-    plt.savefig(f"{outname}_petco2hrf.png", dpi=SET_DPI)
+    plt.savefig(f'{outname}_petco2hrf.png', dpi=SET_DPI)
     plt.close()
 
-    np.savetxt(f"{outname}_petco2hrf.1D", petco2hrf, fmt="%.18f")
+    np.savetxt(f'{outname}_petco2hrf.1D', petco2hrf, fmt='%.18f')
 
     return petco2hrf
 
