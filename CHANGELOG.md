@@ -1,3 +1,16 @@
+# 0.23.0 (Wed Nov 05 2025)
+
+#### 🚀 Enhancement
+
+- Add possibility to select the response function for the PetCO2 signal convolution or to skip it altogether [#135](https://github.com/smoia/phys2cvr/pull/135) ([@smoia](https://github.com/smoia) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
+
+#### Authors: 2
+
+- [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot])
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.22.0 (Wed Nov 05 2025)
 
 #### 🚀 Enhancement
