@@ -476,19 +476,15 @@ def phys2cvr(
 
         # Unless user asks to skip this step, convolve the end tidal signal.
         if comp_petco2hrf is False:
+            LGR.info(
+                'Skipping computation of PetCO2 trace (did you provide a previously '
+                'computed version instead of raw CO2 data?)'
+            )
             petco2hrf = co2
         else:
-            if response_function not in ['hrf', 'rrf', 'crf']:
-                try:
-                    response_function = np.genfromtxt(response_function)
-                except OSError:
-                    raise NotImplementedError(
-                        f'Convolving function {response_function} is currently '
-                        'not supported, or external function file is not found.'
-                    )
-                petco2hrf = signal.compute_petco2hrf(
-                    co2, pidx, freq, outname, response_function
-                )
+            petco2hrf = signal.compute_petco2hrf(
+                co2, pidx, freq, outname, response_function
+            )
 
     # If a regressor directory is not specified, compute the regressors.
     if regr_dir is None:

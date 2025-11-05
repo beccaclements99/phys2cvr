@@ -153,11 +153,13 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
     if co2.ndim > 1:
         raise NotImplementedError('2+ D arrays are not supported.')
 
-    # Extract PETco2
+    # Get response function
     if type(response_function) is np.ndarray:
         hrf = response_function
     elif response_function is None:
-        pass
+        LGR.info(
+            'Computing PetCO2 trace but skipping convolution with response function'
+        )
     elif response_function == 'hrf':
         hrf = create_hrf(freq)
     elif response_function == 'rrf':
@@ -206,14 +208,15 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
         petco2hrf, (petco2hrf.min(), petco2hrf.max()), (petco2.min(), petco2.max())
     )
 
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.title('PetCO2 and convolved PetCO2 (PetCO2hrf)')
-    plt.plot(petco2hrf, '-', petco2, '-')
-    plt.tight_layout()
-    plt.savefig(f'{outname}_petco2hrf.png', dpi=SET_DPI)
-    plt.close()
+    if response_function is not None:
+        plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
+        plt.title('PetCO2 and convolved PetCO2 (PetCO2hrf)')
+        plt.plot(petco2hrf, '-', petco2, '-')
+        plt.tight_layout()
+        plt.savefig(f'{outname}_petco2hrf.png', dpi=SET_DPI)
+        plt.close()
 
-    np.savetxt(f'{outname}_petco2hrf.1D', petco2hrf, fmt='%.18f')
+        np.savetxt(f'{outname}_petco2hrf.1D', petco2hrf, fmt='%.18f')
 
     return petco2hrf
 
