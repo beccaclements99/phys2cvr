@@ -1,3 +1,15 @@
+# 0.23.2 (Mon Nov 10 2025)
+
+#### 🐛 Bug Fix
+
+- Allow internal functions to work with 2D matrices and any of their axes. [#138](https://github.com/smoia/phys2cvr/pull/138) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.23.1 (Wed Nov 05 2025)
 
 #### 🐛 Bug Fix
