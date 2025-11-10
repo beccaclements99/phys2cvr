@@ -639,7 +639,10 @@ def _get_parser():
         '--debug',
         dest='debug',
         action='store_true',
-        help='Only print debugging info to log file. Default is False.',
+        help=(
+            'Print debugging info to log file and export extra files for debugging. '
+            'Default is not to do so.'
+        ),
         default=False,
     )
     optional.add_argument(
@@ -647,7 +650,10 @@ def _get_parser():
         '--quiet',
         dest='quiet',
         action='store_true',
-        help='Only print warnings to log file. Default is False.',
+        help=(
+            'Only print "warnings" level messages to log file. Default is to print '
+            '"info" level and above.'
+        ),
         default=False,
     )
     optional.add_argument(
