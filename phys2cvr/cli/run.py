@@ -703,6 +703,7 @@ def _check_opt_conf(parser):
             parser.lagged_regression = True
             parser.comp_petco2hrf = True
             parser.apply_filter = False
+            parser.skip_xcorr = True
             parser.r2model = 'full'
         elif parser.workflow_config == 'baltimore':
             parser.comp_petco2hrf = False
