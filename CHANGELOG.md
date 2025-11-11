@@ -1,3 +1,15 @@
+# 0.26.1 (Tue Nov 11 2025)
+
+#### 🐛 Bug Fix
+
+- Better handle response functions [#143](https://github.com/smoia/phys2cvr/pull/143) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.26.0 (Tue Nov 11 2025)
 
 #### 💥 Breaking Change during development
