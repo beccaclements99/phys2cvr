@@ -221,9 +221,39 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
     return petco2hrf
 
 
-def resample_signal(ts, freq1, freq2, axis=0):
+def resample_signal_samples(ts, samples, axis=-1):
     """
-    Upsample or downsample a given timeseries.
+    Upsample or downsample a given timeseries based on samples.
+
+    This program brings ts at freq1 to a new timeseries at freq2
+
+    Parameters
+    ----------
+    ts : numpy.ndarray
+        The timeseries to resample.
+    samples : int
+        The new desired amount od samples
+    axis : int
+        The axis over with the interpolation should happen - by default it's
+        -1, i.e. the last dimension.
+
+    Returns
+    -------
+    numpy.ndarray
+        The resampled timeseries
+    """
+    # Upsample functional signal
+    len_tp = ts.shape[axis]
+    regr_t = np.linspace(0, len_tp - 1, samples)
+    time_t = np.linspace(0, len_tp - 1, len_tp)
+    f = spint.interp1d(time_t, ts, fill_value='extrapolate', axis=axis)
+
+    return f(regr_t)
+
+
+def resample_signal_freqs(ts, freq1, freq2, axis=-1):
+    """
+    Upsample or downsample a given timeseries based on frequencies.
 
     This program brings ts at freq1 to a new timeseries at freq2
 
@@ -237,7 +267,7 @@ def resample_signal(ts, freq1, freq2, axis=0):
         The new desired frequency
     axis : int
         The axis over with the interpolation should happen - by default it's
-        0, i.e. the first dimension.
+        -1, i.e. the last dimension.
 
     Returns
     -------
@@ -246,7 +276,7 @@ def resample_signal(ts, freq1, freq2, axis=0):
     """
     # Upsample functional signal
     len_tp = ts.shape[axis]
-    len_s = (len_tp - 1) * 1 / freq1
+    len_s = (len_tp - 1) / freq1
     regr_t = np.linspace(0, len_s, int(len_s * freq2) + 1)
     time_t = np.linspace(0, len_s, len_tp)
     f = spint.interp1d(time_t, ts, fill_value='extrapolate', axis=axis)

@@ -17,7 +17,7 @@ from numpy.lib.stride_tricks import sliding_window_view as swv
 from scipy.stats import zscore
 
 from phys2cvr.io import FIGSIZE, SET_DPI, export_regressor
-from phys2cvr.signal import resample_signal
+from phys2cvr.signal import resample_signal_freqs
 
 R2MODEL = ['full', 'partial', 'intercept', 'adj_full', 'adj_partial', 'adj_intercept']
 
@@ -197,7 +197,7 @@ def get_regr(
         LGR.info('Using all trials for bulk shift estimation.')
 
     # Upsample functional signal
-    func_upsampled = resample_signal(func_avg, 1 / tr, freq)
+    func_upsampled = resample_signal_freqs(func_avg, 1 / tr, freq)
     len_upd = func_upsampled.shape[0]
 
     # Preparing breathhold and CO2 trace for Xcorr
@@ -247,7 +247,7 @@ def get_regr(
     plt.close()
 
     petco2hrf_demean = export_regressor(
-        petco2hrf_shift, freq, tr, outname, 'petco2hrf_simple', ext
+        petco2hrf_shift, func_avg.shape[-1], outname, 'petco2hrf_simple', ext
     )
 
     # Initialise the shifts first.
@@ -277,7 +277,7 @@ def get_regr(
         petco2hrf_lagged = swv(petco2hrf, len_upd)[pos_idx:neg_idx:-1].copy()
 
         petco2hrf_lagged = export_regressor(
-            petco2hrf_lagged, freq, tr, outprefix, 'shifts', ext, axis=1
+            petco2hrf_lagged, func_avg.shape[-1], outprefix, 'shifts', ext
         )
     elif lagged_regression and lag_max is None:
         LGR.warning(
