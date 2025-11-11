@@ -1,3 +1,15 @@
+# 0.25.1 (Tue Nov 11 2025)
+
+#### 🐛 Bug Fix
+
+- Few minor fixes (including correctly skipping xcorr in brightspin-clinical call) [#141](https://github.com/smoia/phys2cvr/pull/141) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.25.0 (Tue Nov 11 2025)
 
 #### 💥 Breaking Change during development
