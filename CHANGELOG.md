@@ -1,3 +1,16 @@
+# 0.27.0 (Tue Nov 11 2025)
+
+#### 💥 Breaking Change during development
+
+- Compute average of ROI signal before eventually filtering it [#144](https://github.com/smoia/phys2cvr/pull/144) ([@smoia](https://github.com/smoia) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
+
+#### Authors: 2
+
+- [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot])
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.26.1 (Tue Nov 11 2025)
 
 #### 🐛 Bug Fix
