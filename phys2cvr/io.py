@@ -460,7 +460,7 @@ def load_array(fname, shape=''):
 
 
 def export_regressor(
-    regressors_matrix, freq, tr, outname, suffix='petco2hrf', ext='.1D', axis=0
+    regressors_matrix, ntp, outname, suffix='petco2hrf', ext='.1D', axis=-1
 ):
     """
     Export generated regressors for fMRI analysis.
@@ -469,10 +469,8 @@ def export_regressor(
     ----------
     regressors_matrix : np.ndarray
         The regressors that needs to be exported, in its original sample
-    freq : int
-        The frequency of the regressors_matrix (hence of the physiological data)
-    tr : float
-        The tr of the fMRI timeseries at which to export.
+    ntp : int
+        The number of fMRI timepoints
     outname : str or path
         Prefix of the output file - can contain a path.
     suffix : str, optional
@@ -480,7 +478,7 @@ def export_regressor(
     ext : str, optional
         The extension of the output file.
     axis : int, optional
-        The axis along which to perform the operation. Default is 0.
+        The axis along which to perform the operation. Default is -1.
 
     Returns
     -------
@@ -488,7 +486,9 @@ def export_regressor(
         Interpolated and demeaned version of `regressors_matrix` in the sampling of the
         fMRI data.
     """
-    regressors_matrix = signal.resample_signal(regressors_matrix, freq, 1 / tr, axis)
+    regressors_matrix = signal.resample_signal_samples(
+        regressors_matrix, ntp, axis=axis
+    )
     regressors_demeaned = regressors_matrix - regressors_matrix.mean(
         axis=axis, keepdims=True
     )
