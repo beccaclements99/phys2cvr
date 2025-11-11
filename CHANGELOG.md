@@ -1,3 +1,15 @@
+# 0.24.0 (Tue Nov 11 2025)
+
+#### 💥 Breaking Change during development
+
+- Use numpy's 1.20+ sliding windows view to fasten up regressors creation [#139](https://github.com/smoia/phys2cvr/pull/139) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.23.2 (Mon Nov 10 2025)
 
 #### 🐛 Bug Fix
