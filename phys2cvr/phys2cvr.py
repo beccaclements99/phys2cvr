@@ -505,7 +505,10 @@ def phys2cvr(
         )
     elif run_regression:
         try:
-            regr = np.genfromtxt(f'{outname}_petco2hrf.1D')
+            regr = np.genfromtxt(
+                os.path.join(regr_dir, '..', f'{outname}_petco2hrf.1D')
+            )
+            regr_shifts = np.genfromtxt(os.path.join(regr_dir, 'co2_shifts.1D'))
         except OSError:
             LGR.warning(f'Regressor {outname}_petco2hrf.1D not found. Estimating it.')
             regr, regr_shifts = stats.get_regr(
@@ -630,9 +633,6 @@ def phys2cvr(
             else:
                 nrep = int(lag_max * freq * 2) + 1
 
-            if regr_dir:
-                outprefix = os.path.join(regr_dir, os.path.split(outname)[1])
-
             # If user specified a lag map, use that one to regress things
             if lag_map:
                 lag, _, _ = io.load_nifti_get_mask(lag_map)
@@ -680,10 +680,7 @@ def phys2cvr(
                         f'Perform L-GLM for lag {lag_list[i]} ({i + 1} of '
                         f'{len(lag_idx_list)}'
                     )
-                    try:
-                        regr = regr_shifts[:, (i * step)]
-                    except NameError:
-                        regr = np.genfromtxt(f'{outprefix}_{i:04g}')
+                    regr = regr_shifts[(i * step), :]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
                     (beta[lag_idx == i], tstat[lag_idx == i], _) = stats.regression(
@@ -718,12 +715,7 @@ def phys2cvr(
 
                 for n, i in enumerate(lag_range):
                     LGR.info(f'Perform L-GLM number {n + 1} of {len(lag_range)}')
-                    try:
-                        regr = regr_shifts[:, i]
-                        LGR.debug(f'Using shift {i} from matrix in memory: {regr}')
-                    except NameError:
-                        regr = np.genfromtxt(f'{outprefix}_{i:04g}')
-                        LGR.debug(f'Reading shift {i} from file {outprefix}_{i:04g}')
+                    regr = regr_shifts[i, :]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
                     (

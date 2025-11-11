@@ -460,17 +460,17 @@ def load_array(fname, shape=''):
 
 
 def export_regressor(
-    petco2hrf_lagged, freq, tr, outname, suffix='petco2hrf', ext='.1D', axis=0
+    regressors_matrix, freq, tr, outname, suffix='petco2hrf', ext='.1D', axis=0
 ):
     """
     Export generated regressors for fMRI analysis.
 
     Parameters
     ----------
-    petco2hrf_shift : np.ndarray
+    regressors_matrix : np.ndarray
         The regressors that needs to be exported, in its original sample
     freq : int
-        The frequency of the petco2hrf_shift (hence physiological data)
+        The frequency of the regressors_matrix (hence of the physiological data)
     tr : float
         The tr of the fMRI timeseries at which to export.
     outname : str or path
@@ -484,16 +484,17 @@ def export_regressor(
 
     Returns
     -------
-    petco2hrf_demean : np.ndarray
-        Interpolated version of `petco2hrf_shift` in the sampling of the fMRI data.
+    regressors_demeaned : np.ndarray
+        Interpolated and demeaned version of `regressors_matrix` in the sampling of the
+        fMRI data.
     """
-    petco2hrf_lagged = signal.resample_signal(petco2hrf_lagged, freq, 1 / tr, axis)
-    petco2hrf_demean = petco2hrf_lagged - petco2hrf_lagged.mean(
+    regressors_matrix = signal.resample_signal(regressors_matrix, freq, 1 / tr, axis)
+    regressors_demeaned = regressors_matrix - regressors_matrix.mean(
         axis=axis, keepdims=True
     )
-    np.savetxt(f'{outname}_{suffix}{ext}', petco2hrf_demean, fmt='%.6f')
+    np.savetxt(f'{outname}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
 
-    return petco2hrf_demean
+    return regressors_demeaned
 
 
 def export_nifti(data, img, fname):
