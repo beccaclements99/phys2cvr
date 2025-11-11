@@ -1,3 +1,15 @@
+# 0.26.0 (Tue Nov 11 2025)
+
+#### 💥 Breaking Change during development
+
+- Split stats models from regressors creation into different files and increase modularity of phys2cvr [#142](https://github.com/smoia/phys2cvr/pull/142) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.25.1 (Tue Nov 11 2025)
 
 #### 🐛 Bug Fix
