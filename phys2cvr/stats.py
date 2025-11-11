@@ -11,7 +11,6 @@ LGR :
 import logging
 import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view as swv
 from scipy.stats import zscore
@@ -48,20 +47,20 @@ def x_corr(func, co2, n_shifts=None, offset=0, abs_xcorr=False):
 
     Returns
     -------
-    float :
+    float
         Highest correlation
-    int :
+    int
         Index of higher correlation
     xcorr : np.ndarray
         Full Xcorr
 
     Raises
     ------
-    ValueError
-        If `offset` is higher than the difference between the length of `co2` and `func`.
     NotImplementedError
         If `offset` < 0
         If `co2` length is smaller than `func` length.
+    ValueError
+        If `offset` is higher than the difference between the length of `co2` and `func`.
     """
     if offset < 0:
         raise NotImplementedError('Negative offsets are not supported yet.')
@@ -104,227 +103,6 @@ def x_corr(func, co2, n_shifts=None, offset=0, abs_xcorr=False):
         return xcorr.max(), xcorr.argmax() + offset, xcorr
 
 
-def get_regr(
-    func_avg,
-    petco2hrf,
-    tr,
-    freq,
-    outname,
-    lag_max=None,
-    trial_len=None,
-    n_trials=None,
-    ext='.1D',
-    lagged_regression=True,
-    legacy=False,
-    abs_xcorr=False,
-    skip_xcorr=False,
-):
-    """
-    Create regressor(s) of interest for nifti GLM.
-
-    Parameters
-    ----------
-    func_avg : np.ndarray
-        Functional timeseries (1D)
-    petco2hrf : np.ndarray
-        Regressor of interest
-    tr : str, int, or float
-        TR of timeseries
-    freq : str, int, or float
-        Sample frequency of petco2hrf
-    outname : list or path
-        Path to output directory for regressors.
-    lag_max : int or float, optional
-        Limits (both positive and negative) of the temporal area to explore,
-        expressed in seconds.
-        Default: 9 (i.e. ±9 seconds)
-    trial_len : str or int, optional
-        Length of each single trial for tasks that have more than one
-        (E.g. BreathHold, CO2 challenges, ...)
-        Used to improve cross correlation estimation.
-        Default: None
-    n_trials : str or int, optional
-        Number of trials in the task.
-        Default: None
-    ext : str, optional
-        Extension to be used for the exported regressors.
-    lagged_regression : bool, optional
-        Estimate regressors for each possible lag of `petco2hrf`.
-        If True, the maximum number of regressors will be `(freq*lag_max*2)+1`
-    legacy : bool, optional
-        If True, exclude the upper lag limit from the regression estimation.
-        If True, the maximum number of regressors will be `(freq*lag_max*2)`
-    abs_xcorr : bool, optional
-        If True, the cross correlation will consider the maximum absolute
-        correlation, i.e. if a negative correlation is higher than the highest
-        positive, the negative correlation will be chosen instead.
-    skip_xcorr : bool, optional
-        If True, skip the cross correlation step.
-
-    Returns
-    -------
-    petco2hrf_demean : np.ndarray
-        The central, demeaned petco2hrf regressor.
-    petco2hrf_lagged : np.ndarray
-        The other shifted versions of the regressor.
-    """
-    # Setting up some variables
-    first_tp, last_tp = 0, -1
-
-    if trial_len and n_trials:
-        # If both are specified, disregard two extreme _trial from matching.
-        LGR.info(f'Specified {n_trials} trials lasting {trial_len} seconds')
-        if n_trials > 2:
-            LGR.info('Ignoring first trial to improve first bulk shift estimation')
-            first_tp = int(trial_len * freq)
-        else:
-            LGR.info('Using all trials for bulk shift estimation')
-        if n_trials > 3:
-            LGR.info('Ignoring last trial to improve first bulk shift estimation')
-            last_tp = first_tp * (n_trials - 1)
-
-    elif trial_len and not n_trials:
-        LGR.warning(
-            'The length of trial was specified, but the number of '
-            'trials was not. Using all trials for bulk shift estimation'
-        )
-    elif not trial_len and n_trials:
-        LGR.warning(
-            'The number of trials was specified, but the length of '
-            'trial was not. Using all trials for bulk shift estimation'
-        )
-    else:
-        LGR.info('Using all trials for bulk shift estimation.')
-
-    # Upsample functional signal
-    func_upsampled = resample_signal_freqs(func_avg, 1 / tr, freq)
-    len_upd = func_upsampled.shape[0]
-
-    # Preparing breathhold and CO2 trace for Xcorr
-    func_cut = func_upsampled[first_tp:last_tp]
-    petco2hrf_cut = petco2hrf[:last_tp]
-
-    if not skip_xcorr:
-        _, optshift, xcorr = x_corr(
-            func_cut, petco2hrf_cut, n_shifts=None, offset=first_tp, abs_xcorr=abs_xcorr
-        )
-        LGR.info(f'Cross correlation estimated bulk shift at {optshift / freq} seconds')
-        # Export estimated optimal shift in seconds
-        with open(f'{outname}_optshift.1D', 'w') as f:
-            print(f'{(optshift / freq):.4f}', file=f)
-
-        # Preparing time axis for plots
-        time_axis = np.linspace(0, (len(xcorr) - 1) / freq, len(xcorr))
-
-        # Export xcorr figure
-        plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-        plt.plot(time_axis, xcorr)
-        plt.plot(time_axis[optshift], xcorr[optshift], 'x')
-        plt.legend(['Cross correlation value', 'Optimal detected shift'])
-        plt.title('Cross correlation and optimal shift')
-        plt.tight_layout()
-        plt.savefig(f'{outname}_optshift.png', dpi=SET_DPI)
-        plt.close()
-    else:
-        optshift = 0
-
-    # This shouldn't happen, but still check
-    if optshift + len_upd > len(petco2hrf):
-        raise Exception(
-            f'The found optimal shift {optshift / freq} removes too many samples to '
-            'continue. This error should not be possible.'
-        )
-
-    petco2hrf_shift = petco2hrf[optshift : optshift + len_upd]
-
-    # Exporting figures of shift
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.plot(zscore(petco2hrf_shift), '-', zscore(func_upsampled), '-')
-    plt.title('Optimally shifted regressor and average ROI signal')
-    plt.legend(['Optimally shifted regressor', 'Average ROI signal'])
-    plt.tight_layout()
-    plt.savefig(f'{outname}_petco2hrf_vs_avgroi.png', dpi=SET_DPI)
-    plt.close()
-
-    petco2hrf_demean = export_regressor(
-        petco2hrf_shift, func_avg.shape[-1], outname, 'petco2hrf_simple', ext
-    )
-
-    # Initialise the shifts first.
-    petco2hrf_lagged = None
-
-    if lagged_regression and lag_max:
-        outprefix = os.path.join(
-            os.path.split(outname)[0], 'regr', os.path.split(outname)[1]
-        )
-        os.makedirs(os.path.join(os.path.split(outname)[0], 'regr'), exist_ok=True)
-
-        # Set num of fine shifts
-        neg_shifts = int(lag_max * freq)
-        pos_shifts = neg_shifts if legacy is True else (neg_shifts + 1)
-
-        # Padding regressor right for shifts if not enough timepoints
-        # Padding regressor left for shifts and update optshift if less than neg_shifts.
-        rpad = max(0, len_upd + optshift + pos_shifts - petco2hrf.shape[0])
-        lpad = max(0, neg_shifts - optshift)
-
-        petco2hrf = np.pad(petco2hrf, (int(lpad), int(rpad)), 'mean')
-
-        # Create sliding window view into petco2hrf, -1 because of reversed indexing
-        neg_idx = optshift - neg_shifts + lpad - 1
-        pos_idx = optshift + pos_shifts + lpad - 1
-        # select the right windows the other way round
-        petco2hrf_lagged = swv(petco2hrf, len_upd)[pos_idx:neg_idx:-1].copy()
-
-        petco2hrf_lagged = export_regressor(
-            petco2hrf_lagged, func_avg.shape[-1], outprefix, 'shifts', ext
-        )
-    elif lagged_regression and lag_max is None:
-        LGR.warning(
-            'The generation of lagged regressors was requested, '
-            'but the maximum lag was not specified. Skipping '
-            'lagged regressor generation.'
-        )
-    else:
-        LGR.info('Skipping lag regressors generation.')
-
-    return petco2hrf_demean, petco2hrf_lagged
-
-
-def get_legendre(degree, length):
-    """
-    Producesthe Legendre polynomials of order `degree`.
-
-    Parameters
-    ----------
-    degree : int
-        Highest order desired.
-    length : int
-        Number of samples of the polynomials.
-
-    Returns
-    -------
-    legendre : np.ndarray
-        A `degree`*`length` array with all the polynomials up to order `degree`
-    """
-
-    def _bonnet(d, x):
-        if d == 0:
-            return np.ones_like(x)
-        elif d == 1:
-            return x
-        else:
-            return (
-                (2 * d - 1) * x * _bonnet(d - 1, x) - (d - 1) * _bonnet(d - 2, x)
-            ) / d
-
-    x = np.linspace(-1, 1, length)
-    legendre = np.empty([length, degree + 1], dtype='float32')
-    for n in range(degree + 1):
-        legendre[:, n] = _bonnet(n, x)
-    return legendre
-
-
 def ols(Ymat, Xmat, r2model='full', residuals=False, demean=False):
     """
     Implement Ordinary Least Square linear regression.
@@ -341,26 +119,26 @@ def ols(Ymat, Xmat, r2model='full', residuals=False, demean=False):
     Xmat : np.ndarray
         Independent variables, 1D or 2D. The regressor of interest MUST be the last one.
         Regressors must be in columns, i.e. time axis must be axis 0.
-    r2model : {'full', 'partial', 'intercept', 'adj_full', 'adj_partial', 'adj_intercept'}, optional
-        R^2 to report.
+    r2model : {`full`, `partial`, `intercept`, `adj_full`, `adj_partial`, `adj_intercept`}, optional
+        R^2 model to compute in OLS.
         Possible models are:
-            - 'full' (default)
+            - `full` (default)
                 Use every regressor in the model, i.e. compare versus baseline 0
-            - 'partial'
+            - `partial`
                 Consider only the first vector of Xmat in the model, i.e. compare
                 versus baseline composed by all vectors of Xmat beside the first.
-            - 'intercept'
+            - `intercept`
                 Use every regressor in the model, but the intercept, i.e. compare
                 versus baseline intercept (Legendre polynomial order 0, a.k.a.
                 average signal)
-            - 'adj_*'
+            - `adj_*`
                 Adjusted R^2 version of simple counterpart
         Under normal conditions, while the R^2 value will be different between options,
         a lagged regression based on any R^2 model will give the same results.
         This WILL NOT be the case if orthogonalisations between the first vector of Xmat
         and the others are introduced: a lagged regression based on `partial` might hold
-        different results from .
-        Default: 'full'
+        different results from others. The original AFNI implementation used `partial`.
+        Default: `full`
     residuals : bool, optional
         If True, output only residuals of the model - this is mainly for orthogonalisation
         If False, output betas, tstats, R^2 (default).
@@ -380,11 +158,11 @@ def ols(Ymat, Xmat, r2model='full', residuals=False, demean=False):
     Raises
     ------
     NotImplementedError
-        If Ymat has more than 2 dimensions
-        If Xmat has more than 2 dimensions
+        If Ymat has more than 2 dimensions.
+        If Xmat has more than 2 dimensions.
         At the moment, if "poly" R^2 is declared, as it's not implemented yet.
     ValueError
-        If a non-valid R^2 value is declared
+        If a non-valid R^2 value is declared.
     """
     if Ymat.ndim > 2:
         raise NotImplementedError(
@@ -515,26 +293,16 @@ def regression(
         Extra factors (regressors) that will be used to orthogonalise `ortho_mat`
     mask : np.ndarray or None, optional
         A 3D mask to reduce the number of voxels to run the regression for.
-    r2model : {'full', 'partial', 'intercept', 'adj_full', 'adj_partial', 'adj_intercept'}, optional
-        R^2 to report.
-        Possible models are:
-            - 'full' (default)
-                Use every regressor in the model, i.e. compare versus baseline 0
-            - 'partial'
-                Consider only `regr` in the model, i.e. compare versus baseline
-                composed by all other regressors (`denoise_mat`)
-            - 'intercept'
-                Use every regressor in the model, but the intercept, i.e. compare
-                versus baseline intercept (Legendre polynomial order 0, a.k.a.
-                average signal)
-            - 'adj_*'
-                Adjusted R^2 version of normal counterpart
-        Under normal conditions, while the R^2 value will be different between options,
-        a lagged regression based on any R^2 model will give the same results.
-        This WILL NOT be the case if orthogonalisations between `regr` and `denoise_mat`
-        are introduced: a lagged regression based on `partial` might hold different
-        results.
-        Default: 'full'
+    r2model : {`full`, `partial`, `intercept`, `adj_full`, `adj_partial`, `adj_intercept`}, optional
+        R^2 model the regression should return (and hence used for lag selection).
+        Potentially invariant if no orthogonalisation is introduced,
+        will change results with orthogonalisations.
+        See `stats.ols` help for more details.
+        Default: `full`
+    debug : bool, optional
+        If in debug mode, export computed regressor matrices.
+    x1D : str, optional
+        If in debug mode, the name of the exported regressor matrices.
 
     Returns
     -------
@@ -603,7 +371,7 @@ def regression(
         np.savetxt(x1D, Xmat, fmt='%.6f')
 
     betas, tstats, r_square = ols(
-        Ymat.T, Xmat, r2model='full', residuals=False, demean=False
+        Ymat.T, Xmat, r2model=r2model, residuals=False, demean=False
     )
 
     if debug:
