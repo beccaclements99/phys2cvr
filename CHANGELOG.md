@@ -2,7 +2,13 @@
 
 #### 💥 Breaking Change during development
 
-- Split resampling between frequencies and samples, and refactor original resample_signal to improve clarity. [#140](https://github.com/smoia/phys2cvr/pull/140) ([@smoia](https://github.com/smoia))
+- Split resampling between frequencies and samples and fix possible sampling issues in resampling. [#140](https://github.com/smoia/phys2cvr/pull/140) ([@smoia](https://github.com/smoia))
+
+Due to the change of resampling algorithms, this Breaking Change introduces minor differences compared to the previous version in the results, particularly in some configurations' CVR maps and T-stat maps.
+CVR maps diff: max=`4.8*10^-7`, mean=`0` (max=`1.2*10^-7`, mean=`0` using `--emat`).
+T-stat maps diff: max=`3.81*10^-6`, mean=`10^-8` (no difference using `--emat`).
+No difference in lag maps nor in non-lagged maps.
+All differences are in absolute value. Having set max tolerance to `10^-5` and mean tolerance to `10^-6`, I consider the differences being within tolerance.
 
 #### Authors: 1
 
