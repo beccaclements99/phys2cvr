@@ -26,19 +26,20 @@ LGR.setLevel(logging.INFO)
 
 def spc(ts):
     """
-    Compute signal percentage change of ts.
+    Compute signal percentage change over time series (ts).
 
-    Those ts that have mean 0 are divided by 1 instead.
+    Timeseries are divided by the mean.
+    Timeseries that have a mean of 0 are divided by 1 instead.
 
     Parameters
     ----------
     ts : numpy.ndarray
-        A timeseries or a set of timeseries - it is assumed that the last dimension is time.
+        A timeseries or a set of timeseries - it is assumed that the array's last dimension is time.
 
     Returns
     -------
     numpy.ndarray
-        The SPC version of ts.
+        The signal percentage change version of the original ts.
     """
     m = ts.mean(axis=-1)[..., np.newaxis]
     md = deepcopy(m)
@@ -51,12 +52,12 @@ def spc(ts):
 
 def create_hrf(freq=40):
     """
-    Create a canonical haemodynamic response function sampled at the given frequency.
+    Create a canonical haemodynamic response function which is sampled at the given frequency.
 
     Parameters
     ----------
     freq : float
-        Sampling frequency of the haemodynamic response function.
+        Sampling frequency used to resample the haemodynamic response function.
 
     Returns
     -------
@@ -93,25 +94,25 @@ def create_hrf(freq=40):
 
 def filter_signal(data, tr, lowcut=0.02, highcut=0.04, order=9):
     """
-    Create a bandpass filter given a lowcut and a highcut, then filter data.
+    Create a bandpass filter with a lowcut (lower threshold) and a highcut (upper threshold), then filter data accordingly.
 
     Parameters
     ----------
     data : np.ndarray
-        Data to filter (along last axis)
+        Data to filter (over the last dimension)
     tr : float
-        TR of functional files
+        Repetition time (TR) of functional files
     lowcut : float
-        Lower frequency in the bandpass
+        Low frequency threshold in the bandpass
     highcut : float
-        Higher frequency in the bandpass
+        High frequency threshold in the bandpass
     order : int
-        The order of the butterworth filter
+        The order to be used for the butterworth filter
 
     Returns
     -------
     filt_data : np.ndarray
-        Input `data`, but filtered.
+        Bandpass-filtered input `data`.
     """
     nyq = (1 / tr) / 2
     low = lowcut / nyq
@@ -123,18 +124,18 @@ def filter_signal(data, tr, lowcut=0.02, highcut=0.04, order=9):
 
 def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='full'):
     """
-    Create PetCO2 trace from CO2 trace, then convolve to get PetCO2hrf.
+    Create the PetCO2 trace from CO2 trace, then convolve it to obtain the PetCO2hrf.
 
     Parameters
     ----------
     co2 : np.ndarray
         CO2 (or physiological) regressor
     pidx : np.ndarray
-        Index of peaks
+        Indices of peaks
     freq : str, int, or float
         Sample frequency of the CO2 regressor
     outname : str
-        Prefix of the exported file
+        Prefix of the output file (i.e., the regressor of interest).
     response_function : {`hrf`, `rrf`, `crf`}, None, str, path, or 1D array-like , optional
         Name of the response function to be used in the convolution of the regressor of
         interest or path to a 1D file containing one. Default is `hrf`.
@@ -151,19 +152,21 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
     Returns
     -------
     petco2hrf : np.ndarray
-        Convolved CO2 trace.
+        Convolved PetCO2 trace.
 
     Raises
     ------
     NotImplementedError
-        If the provided co2 is not a 1D array
-        If the provided response function is not a supported option
+        If the provided CO2 is not a 1D array.
+        If the provided response function is not a supported option.
     ValueError
-        if the provided response function
+        if the provided response function.
     """
     co2 = co2.squeeze()
     if co2.ndim > 1:
-        raise NotImplementedError('2+ D arrays are not supported.')
+        raise NotImplementedError(
+            'Arrays with more than 2 dimensions are not supported.'
+        )
 
     if type(response_function) is str:
         if Path(response_function).exists():
@@ -257,19 +260,19 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
 
 def resample_signal_samples(ts, samples, axis=-1):
     """
-    Upsample or downsample a given timeseries based on samples.
+    Upsample or downsample a given timeseries based on number of samples.
 
-    This program brings ts at freq1 to a new timeseries at freq2
+    This program resamples ts with the original frequency (freq1) to a timeseries at new frequency (freq2)
 
     Parameters
     ----------
     ts : numpy.ndarray
-        The timeseries to resample.
+        The timeseries to be resampled
     samples : int
-        The new desired amount od samples
+        The new desired number of samples in ts
     axis : int
-        The axis over with the interpolation should happen - by default it's
-        -1, i.e. the last dimension.
+        The axis (dimension) over which the interpolation should be applied - by default it's
+        -1, i.e., the last dimension.
 
     Returns
     -------
@@ -287,20 +290,20 @@ def resample_signal_samples(ts, samples, axis=-1):
 
 def resample_signal_freqs(ts, freq1, freq2, axis=-1):
     """
-    Upsample or downsample a given timeseries based on frequencies.
+    Upsample or downsample a given timeseries based on the current and desired frequency.
 
-    This program brings ts at freq1 to a new timeseries at freq2
+    This program resamples ts with the original frequency (freq1) to a timeseries at new frequency (freq2)
 
     Parameters
     ----------
     ts : numpy.ndarray
-        The timeseries to resample.
+        The timeseries to be resampled
     freq1 : float
-        The frequency of the timeseries to resample
+        The current frequency of the timeseries to be resampled
     freq2 : float
-        The new desired frequency
+        The new desired frequency for the timeseries
     axis : int
-        The axis over with the interpolation should happen - by default it's
+        The axis (dimension) over which the interpolation should happen - by default it's
         -1, i.e. the last dimension.
 
     Returns
