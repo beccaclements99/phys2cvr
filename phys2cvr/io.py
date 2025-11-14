@@ -65,32 +65,26 @@ def if_declared_force_type(var, dtype, varname='an input variable', silent=False
     NotImplementedError
         If dtype is not 'int', 'float', 'str', or 'list'
     """
-    if var:
-        if dtype == 'int':
-            tmpvar = int(var)
-        elif dtype == 'float':
-            tmpvar = float(var)
-        elif dtype == 'str':
-            tmpvar = str(var)
-        elif dtype == 'list':
-            if type(var) is list:
-                tmpvar = var
-            else:
-                tmpvar = [var]
-        else:
-            raise NotImplementedError(f'Type {dtype} not supported')
-
-        if not silent:
-            if type(tmpvar) is not type(var):
-                if varname != 'an input variable':
-                    varname = f'variable {varname}'
-
-                LGR.warning(f'Changing type of {varname} from {type(var)} to {dtype}')
-
-        return tmpvar
-
-    else:
+    if not var:
         return var
+
+    converters = {
+        'int': int,
+        'float': float,
+        'str': str,
+        'list': lambda v: v if isinstance(v, list) else [v],
+    }
+
+    if dtype not in converters:
+        raise NotImplementedError(f'Type {dtype} not supported')
+
+    tmpvar = converters[dtype](var)
+
+    if not silent and type(tmpvar) is not type(var):
+        name = f'variable {varname}' if varname != 'an input variable' else varname
+        LGR.warning(f'Changing type of {name} from {type(var)} to {dtype}')
+
+    return tmpvar
 
 
 def check_ext(all_ext, fname, scan=False, remove=False):
@@ -120,12 +114,10 @@ def check_ext(all_ext, fname, scan=False, remove=False):
             If both ``remove`` and ``has_ext`` are True, returns also found extension.
     """
     all_ext = if_declared_force_type(all_ext, 'list', silent=True)
-
     ext = ''.join(Path(fname).suffixes)
-
     LGR.debug(f'{fname} ends with extension {ext}')
 
-    has_ext = True if ext in all_ext else False
+    has_ext = ext in all_ext
 
     if not has_ext and scan:
         for ext in all_ext:
@@ -173,14 +165,15 @@ def check_nifti_dim(fname, data, dim=4):
     ValueError
         If `data` has less dimensions than `dim`
     """
-    if len(data.shape) < dim:
+    if data.ndim < dim:
         raise ValueError(
-            f'A {dim}D nifti file is required, but {fname} has {data.ndim}D. Please '
-            'check the input file.'
+            f'A {dim}D nifti file is required, but {fname} has {data.ndim}D. '
+            'Please check the input file.'
         )
-    if len(data.shape) > dim:
+
+    if data.ndim > dim:
         LGR.warning(f'{fname} has more than {dim} dimensions. Removing D > {dim}.')
-        for ax in range(dim, len(data.shape)):
+        for ax in range(dim, data.ndim):
             data = np.delete(data, np.s_[1:], axis=ax)
 
     return np.squeeze(data)
@@ -218,12 +211,13 @@ def check_array_dim(fname, data, shape=None):
     data = data.squeeze()
     LGR.info('Checking data shape.')
 
-    if data.shape[0] == 0:
+    if data.size == 0:
         raise ValueError(f'{fname} is empty!')
     if data.ndim > 2:
         raise NotImplementedError(
             f'Only matrices up to 2D are supported, but given matrix is {data.ndim}D.'
         )
+
     if shape is not None:
         if data.ndim == 1 and shape == 'rectangle':
             data = data[..., np.newaxis]
@@ -268,7 +262,6 @@ def load_nifti_get_mask(fname, is_mask=False, dim=3):
         Image object from nibabel.
     """
     img = nib.load(fname)
-
     LGR.info(f'Loading {fname}')
 
     if check_ext(EXT_GIFTI, fname)[0]:
@@ -277,11 +270,7 @@ def load_nifti_get_mask(fname, is_mask=False, dim=3):
         data = img.get_fdata()
 
     data = check_nifti_dim(fname, data, dim=dim)
-
-    if is_mask:
-        mask = data != 0
-    else:
-        mask = data.any(axis=-1).squeeze()
+    mask = (data != 0) if is_mask else data.any(axis=-1).squeeze()
 
     return data, mask, img
 
@@ -306,23 +295,20 @@ def load_txt(fname, shape=None):
     check_array_dim
     """
     LGR.info(f'Loading {fname}.')
-
     _, _, ext = check_ext(EXT_1D, fname, scan=True, remove=True)
 
-    if ext in ['.csv', '.csv.gz']:
-        delimiter = ','
-    elif ext in ['.tsv', '.tsv.gz']:
-        delimiter = '\t'
-    elif ext in ['.txt', '.1d', '.par']:
-        delimiter = ' '
-    else:
-        delimiter = None
+    delimiter_map = {
+        '.csv': ',',
+        '.csv.gz': ',',
+        '.tsv': '\t',
+        '.tsv.gz': '\t',
+        '.txt': ' ',
+        '.1d': ' ',
+        '.par': ' ',
+    }
 
-    mtx = np.genfromtxt(fname, delimiter=delimiter)
-
-    mtx = check_array_dim(fname, mtx, shape)
-
-    return mtx
+    mtx = np.genfromtxt(fname, delimiter=delimiter_map.get(ext))
+    return check_array_dim(fname, mtx, shape)
 
 
 def load_mat(fname, shape=None):
@@ -363,8 +349,7 @@ def load_mat(fname, shape=None):
         from pymatreader import read_mat
     except ImportError:
         raise ImportError(
-            'pymatreader is required to import mat files. '
-            'Please see install instructions.'
+            'pymatreader is required to import mat files. Please see install instructions.'
         )
 
     LGR.info(f'Loading {fname}.')
@@ -382,24 +367,15 @@ def load_mat(fname, shape=None):
             if type(data[k]) is np.ndarray:
                 data_keys.append(k)
 
-    if len(data_keys) < 1:
+    if not data_keys:
         raise EOFError(f'{fname} does not seem to contain a numeric matrix.')
-    elif len(data_keys) > 1:
-        LGR.warning(
-            'Found multiple possible arrays to load. '
-            'Selecting the biggest (highest pythonic size).'
-        )
+    if len(data_keys) > 1:
+        LGR.warning('Found multiple possible arrays to load. Selecting the biggest.')
 
-    key = data_keys[0]
-    for k in data_keys[1:]:
-        if data[k].size > data[key].size:
-            key = k
-
+    key = max(data_keys, key=lambda k: data[k].size)
     LGR.info(f'Selected data from MATLAB variable {key}')
-    mtx = data[key]
-    mtx = check_array_dim(fname, mtx, shape)
 
-    return mtx
+    return check_array_dim(fname, data[key], shape)
 
 
 def load_xls(fname, shape=''):
@@ -446,17 +422,13 @@ def load_array(fname, shape=''):
     _, _, ext = check_ext(EXT_ARRAY, fname, scan=True, remove=True)
 
     if ext in EXT_1D:
-        mtx = load_txt(fname, shape=shape)
-    elif ext in EXT_MAT:
-        mtx = load_mat(fname, shape=shape)
-    # elif ext in EXT_XLS:
-    #     mtx = load_xls(fname, shape=shape)
-    else:
-        raise NotImplementedError(
-            f'{fname} file extension {ext} was not found or is not supported yet'
-        )
+        return load_txt(fname, shape=shape)
+    if ext in EXT_MAT:
+        return load_mat(fname, shape=shape)
 
-    return mtx
+    raise NotImplementedError(
+        f'{fname} file extension {ext} was not found or is not supported yet'
+    )
 
 
 def export_regressor(
@@ -493,7 +465,6 @@ def export_regressor(
         axis=axis, keepdims=True
     )
     np.savetxt(f'{outname}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
-
     return regressors_demeaned
 
 
@@ -511,7 +482,6 @@ def export_nifti(data, img, fname):
         Name of the output file
     """
     klass = img.__class__
-
     out_img = klass(data, img.affine, img.header)
     out_img.to_filename(fname)
 
