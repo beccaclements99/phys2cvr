@@ -12,13 +12,13 @@ import logging
 from copy import deepcopy
 from pathlib import Path, PosixPath
 
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate as spint
 import scipy.stats as sct
 from scipy.signal import butter, filtfilt
 
-from phys2cvr.io import FIGSIZE, SET_DPI, load_array
+from phys2cvr.io import load_array
+from phys2cvr.viz import plot_two_timeseries
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
@@ -124,7 +124,9 @@ def filter_signal(data, tr, lowcut=0.02, highcut=0.04, order=9, axis=-1):
     return filtfilt(a, b, data, axis=axis)
 
 
-def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='full'):
+def compute_petco2hrf(
+    co2, pidx, freq, outprefix, comp_endtidal=True, response_function='hfr', mode='full'
+):
     """
     Create the PetCO2 trace from CO2 trace, then convolve it to obtain the PetCO2hrf.
 
@@ -136,8 +138,10 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
         Indices of peaks
     freq : str, int, or float
         Sample frequency of the CO2 regressor
-    outname : str
+    outprefix : str
         Prefix of the output file (i.e., the regressor of interest).
+    comp_endtidal : bool
+        If True, interpolate input regressor
     response_function : {`hrf`, `rrf`, `crf`}, None, str, path, or 1D array-like , optional
         Name of the response function to be used in the convolution of the regressor of
         interest or path to a 1D file containing one. Default is `hrf`.
@@ -170,12 +174,35 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
             'Arrays with more than 2 dimensions are not supported.'
         )
 
+    if comp_endtidal:
+        nx = np.linspace(0, co2.size, co2.size)
+        f = spint.interp1d(pidx, co2[pidx], fill_value='extrapolate')
+        petco2 = f(nx)
+
+        # Plot PetCO2 vs CO2
+        plot_two_timeseries(
+            petco2, co2, f'{outprefix}_co2_vs_petco2.png', 'PetCO2', 'CO2', freq
+        )
+
+        # Demean and export
+        petco2 = petco2 - petco2.mean()
+        np.savetxt(f'{outprefix}_petco2.1D', petco2, fmt='%.18f')
+    else:
+        LGR.info(
+            'Skipping End Tidal interpolation of PetCO2 trace (if you provided raw CO2 '
+            'data, then you probably should not be doing this)'
+        )
+        petco2 = co2 - co2.mean()
+
     if type(response_function) is str:
         if Path(response_function).exists():
             response_function = Path(response_function)
             LGR.debug(f'{response_function} is a valid file')
         else:
             response_function = response_function.lower()
+            response_function = (
+                None if response_function == 'none' else response_function
+            )
 
     if type(response_function) in [list, np.ndarray]:
         convolving_function = (
@@ -221,41 +248,23 @@ def compute_petco2hrf(co2, pidx, freq, outname, response_function='hfr', mode='f
             'not found.'
         )
 
-    nx = np.linspace(0, co2.size, co2.size)
-    f = spint.interp1d(pidx, co2[pidx], fill_value='extrapolate')
-    petco2 = f(nx)
-
-    # Plot PETco2
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.title('CO2 and PetCO2')
-    plt.plot(co2, '-', petco2, '-')
-    plt.legend(['CO2', 'PetCO2'])
-    plt.tight_layout()
-    plt.savefig(f'{outname}_petco2.png', dpi=SET_DPI)
-    plt.close()
-
-    # Demean and export
-    petco2 = petco2 - petco2.mean()
-    np.savetxt(f'{outname}_petco2.1D', petco2, fmt='%.18f')
-
-    # Convolve, and then rescale to have same amplitude (?)
-    petco2hrf = (
-        np.convolve(petco2, convolving_function, mode=mode)
-        if response_function is not None
-        else petco2
-    )
-    petco2hrf = np.interp(
-        petco2hrf, (petco2hrf.min(), petco2hrf.max()), (petco2.min(), petco2.max())
-    )
-
+    # Plot convolved PetCO2 vs PetCO2
     if response_function is not None:
-        plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-        plt.title('PetCO2 and convolved PetCO2 (PetCO2hrf)')
-        plt.plot(petco2hrf, '-', petco2, '-')
-        plt.tight_layout()
-        plt.savefig(f'{outname}_petco2hrf.png', dpi=SET_DPI)
-        plt.close()
-        np.savetxt(f'{outname}_petco2hrf.1D', petco2hrf, fmt='%.18f')
+        petco2hrf = np.convolve(petco2, convolving_function, mode=mode)
+        petco2hrf = np.interp(
+            petco2hrf, (petco2hrf.min(), petco2hrf.max()), (petco2.min(), petco2.max())
+        )
+        plot_two_timeseries(
+            petco2hrf,
+            petco2,
+            f'{outprefix}_petco2_vs_petco2hrf.png',
+            'Convolved PetCO2',
+            'PetCO2',
+            freq,
+        )
+    else:
+        LGR.info('Skipping convolution of PetCO2 trace')
+        petco2hrf = petco2
 
     return petco2hrf
 

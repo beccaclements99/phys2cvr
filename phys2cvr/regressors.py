@@ -1,29 +1,23 @@
 #!/usr/bin/env python3
 """
-Statistical module for phys2cvr.
+Module that creates the regressors used in phys2cvr.
 
 Attributes
 ----------
 LGR
     Logger
-R2MODEL : list
-    List of supported R^2 models
 """
 
 import logging
 import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view as swv
-from scipy.stats import zscore
 
-from phys2cvr import io
-from phys2cvr.io import FIGSIZE, SET_DPI, export_regressor
+from phys2cvr.io import export_regressor
 from phys2cvr.signal import resample_signal_freqs
 from phys2cvr.stats import x_corr
-
-R2MODEL = ['full', 'partial', 'intercept', 'adj_full', 'adj_partial', 'adj_intercept']
+from phys2cvr.viz import plot_two_timeseries, plot_xcorr
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
@@ -65,7 +59,7 @@ def compute_bulk_shift(
     func_upsampled,
     petco2hrf,
     freq,
-    outname,
+    outprefix,
     trial_len=None,
     n_trials=None,
     abs_xcorr=False,
@@ -81,7 +75,7 @@ def compute_bulk_shift(
         Regressor of interest
     freq : str, int, or float
         Sample frequency of petco2hrf
-    outname : list or path
+    outprefix : list or path
         Path to output directory for regressors.
     trial_len : str or int, optional
         Length of each single trial for tasks that have more than one
@@ -135,21 +129,11 @@ def compute_bulk_shift(
 
     LGR.info(f'Cross correlation estimated a bulk shift of {optshift / freq} seconds')
     # Export estimated optimal shift in seconds
-    with open(f'{outname}_optshift.1D', 'w') as f:
+    with open(f'{outprefix}_optshift.1D', 'w') as f:
         print(f'{(optshift / freq):.4f}', file=f)
 
-    # Preparing time axis for plots
-    time_axis = np.linspace(0, (len(xcorr) - 1) / freq, len(xcorr))
-
     # Export xcorr figure
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.plot(time_axis, xcorr)
-    plt.plot(time_axis[optshift], xcorr[optshift], 'x')
-    plt.legend(['Cross correlation value', 'Optimal detected shift'])
-    plt.title('Cross correlation and optimal shift')
-    plt.tight_layout()
-    plt.savefig(f'{outname}_optshift.png', dpi=SET_DPI)
-    plt.close()
+    plot_xcorr(xcorr, outprefix, freq)
 
     # This shouldn't happen, but still check
     if optshift + func_upsampled.shape[0] > len(petco2hrf):
@@ -168,7 +152,7 @@ def create_fine_shift_regressors(
     freq,
     func_size,
     func_upsamp_size,
-    outname,
+    outprefix,
     ext='.1D',
     legacy=False,
 ):
@@ -190,7 +174,7 @@ def create_fine_shift_regressors(
         Total timepoints of functional timeseries
     func_upsamp_size : int
         Total timepoints of functional timeseries, resampled at `freq` frequency
-    outname : list or path
+    outprefix : list or path
         Path to output directory for regressors.
     ext : str, optional
         Extension to be used for the exported regressors.
@@ -203,7 +187,7 @@ def create_fine_shift_regressors(
     petco2hrf_lagged : np.ndarray
         The shifted versions of the regresosr of interest.
     """
-    outdir, base = os.path.split(outname)
+    outdir, base = os.path.split(outprefix)
     regr_dir = os.path.join(outdir, 'regr')
     os.makedirs(regr_dir, exist_ok=True)
     outprefix = os.path.join(regr_dir, base)
@@ -235,7 +219,7 @@ def create_physio_regressor(
     petco2hrf,
     tr,
     freq,
-    outname,
+    outprefix,
     lag_max=None,
     trial_len=None,
     n_trials=None,
@@ -258,7 +242,7 @@ def create_physio_regressor(
         Repetition time (TR) of timeseries
     freq : str, int, or float
         Sample frequency of petco2hrf
-    outname : list or path
+    outprefix : list or path
         Path to output directory for computed regressors.
     lag_max : int or float, optional
         Limits (both positive and negative) for the estimated temporal lag,
@@ -302,21 +286,24 @@ def create_physio_regressor(
         optshift = 0
     else:
         optshift = compute_bulk_shift(
-            func_upsampled, petco2hrf, freq, outname, trial_len, n_trials, abs_xcorr
+            func_upsampled, petco2hrf, freq, outprefix, trial_len, n_trials, abs_xcorr
         )
 
     petco2hrf_shift = petco2hrf[optshift : optshift + func_upsampled.shape[0]]
 
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.plot(zscore(petco2hrf_shift), '-', zscore(func_upsampled), '-')
-    plt.title('Optimally shifted regressor and average ROI signal')
-    plt.legend(['Optimally shifted regressor', 'Average ROI signal'])
-    plt.tight_layout()
-    plt.savefig(f'{outname}_petco2hrf_vs_avgroi.png', dpi=SET_DPI)
-    plt.close()
+    # Plot (shifted) regressor vs average ROI signal.
+    plot_two_timeseries(
+        petco2hrf_shift,
+        func_upsampled,
+        f'{outprefix}_petco2hrf_vs_avgroi.png',
+        'Optimally shifted regressor',
+        'Average ROI signal',
+        freq,
+        zscore=True,
+    )
 
-    petco2hrf_demean = io.export_regressor(
-        petco2hrf_shift, func_avg.shape[-1], outname, 'petco2hrf_simple', ext
+    petco2hrf_demean = export_regressor(
+        petco2hrf_shift, func_avg.shape[-1], outprefix, 'petco2hrf_simple', ext
     )
 
     # Initialise the shifts first.
@@ -329,7 +316,7 @@ def create_physio_regressor(
             freq,
             func_avg.shape[-1],
             func_upsampled.shape[-1],
-            outname,
+            outprefix,
             ext,
             legacy,
         )
