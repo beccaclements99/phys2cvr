@@ -28,7 +28,7 @@ import logging
 
 import nibabel as nib
 import numpy as np
-from peakdet.io import load_physio
+from peakdet.io import load_physio as load_pk_physio
 
 from phys2cvr import signal, utils
 
@@ -262,7 +262,7 @@ def load_physio(fname):
     np.float
         The sampling frequency
     """
-    phys = load_physio(fname, allow_pickle=True)
+    phys = load_pk_physio(fname, allow_pickle=True)
 
     return phys.data, phys.peaks, phys.freq
 
