@@ -264,7 +264,7 @@ def load_physio(fname):
     """
     phys = load_pk_physio(fname, allow_pickle=True)
 
-    return phys.data, phys.peaks, phys.freq
+    return phys.data, phys.peaks, phys.fs
 
 
 def export_regressor(
