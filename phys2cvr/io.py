@@ -35,12 +35,13 @@ from phys2cvr import signal, utils
 SET_DPI = 100
 FIGSIZE = (18, 10)
 EXT_1D = ['.txt', '.csv', '.tsv', '.1d', '.par', '.tsv.gz']
+EXT_PHYS = ['.phys']
 EXT_MAT = ['.mat']
 # EXT_XLS = [".xls"]
 EXT_ARRAY = EXT_1D + EXT_MAT  # + EXT_XLS
 EXT_NIFTI = ['.nii', '.nii.gz']
 EXT_GIFTI = ['.gii', '.gii.gz']
-EXT_ALL = EXT_ARRAY + EXT_NIFTI + EXT_GIFTI
+EXT_ALL = EXT_ARRAY + EXT_PHYS + EXT_NIFTI + EXT_GIFTI
 
 
 LGR = logging.getLogger(__name__)
