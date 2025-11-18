@@ -69,12 +69,13 @@ def plot_two_timeseries(
     zscore : bool, optional
         If True, zscore timeseries before plot. Default is False.
     """
-    time_axis = _time_axis(ts1, freq)
     ts1 = zs(ts1) if zscore else ts1
     ts2 = zs(ts2) if zscore else ts2
 
     plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
+    time_axis = _time_axis(ts1, freq)
     plt.plot(time_axis, ts1, '-')
+    time_axis = _time_axis(ts2, freq)
     plt.plot(time_axis, ts2, '-')
     plt.title(f'{ts1_name} vs {ts2_name}')
     plt.legend([ts1_name, ts2_name])
