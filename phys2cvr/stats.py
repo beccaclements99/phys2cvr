@@ -15,7 +15,7 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view as swv
 from scipy.stats import zscore
 
-from phys2cvr.io import check_array_dim
+from phys2cvr.utils import check_array_dim
 
 R2MODEL = ['full', 'partial', 'intercept', 'adj_full', 'adj_partial', 'adj_intercept']
 
