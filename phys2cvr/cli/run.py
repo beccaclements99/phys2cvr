@@ -589,7 +589,7 @@ def _check_opt_conf(parser):
         else:
             raise NotImplementedError(
                 f'{parser.workflow_config} is not configured. '
-                "In fact, you shouldn't see this message at all."
+                'In fact, you should not see this message at all.'
             )
 
     if parser.r2model is None:
@@ -601,9 +601,7 @@ def _check_opt_conf(parser):
 
 if __name__ == '__main__':
     raise RuntimeError(
-        'phys2cvr/cli/run.py should not be run directly;\n'
-        'Please `pip install` phys2cvr and use the '
-        '`phys2cvr` command'
+        'phys2cvr/cli/run.py should not be run directly;\n Please `pip install` phys2cvr and use the `phys2cvr` command'
     )
 
 
