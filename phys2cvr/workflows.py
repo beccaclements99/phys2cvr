@@ -392,10 +392,11 @@ def phys2cvr(
         # The former is more robust to intrinsic data noise than the latter
         petco2hrf = signal.spc(func_avg)
 
-        # Reassign fname_co2 to fname_func for later use - calling splitext twice cause .gz
-        basename_co2 = os.path.splitext(
-            os.path.splitext(f'avg_{os.path.basename(fname_func)}')[0]
-        )[0]
+        # Reassign fname_co2 to fname_func for later use
+        basename_co2 = utils.check_ext(
+            io.EXT_ALL, f'avg_{os.path.basename(fname_func)}', scan=True, remove=True
+        )
+
         outprefix = os.path.join(outdir, basename_co2)
 
         # If freq was declared, upsample the average GM to that.
@@ -442,6 +443,11 @@ def phys2cvr(
                 f'{fname_co2} file type is not supported yet, or '
                 'the extension was not specified.'
             )
+
+        basename_co2 = utils.check_ext(
+            io.EXT_ALL, os.path.basename(fname_co2), scan=True, remove=True
+        )
+        outprefix = os.path.join(outdir, basename_co2)
 
         petco2hrf = signal.compute_petco2hrf(
             co2, pidx, freq, outprefix, comp_endtidal, response_function
