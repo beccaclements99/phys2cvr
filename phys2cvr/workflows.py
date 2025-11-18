@@ -395,7 +395,7 @@ def phys2cvr(
         # Reassign fname_co2 to fname_func for later use
         basename_co2 = utils.check_ext(
             io.EXT_ALL, f'avg_{os.path.basename(fname_func)}', scan=True, remove=True
-        )
+        )[1]
 
         outprefix = os.path.join(outdir, basename_co2)
 
@@ -446,7 +446,7 @@ def phys2cvr(
 
         basename_co2 = utils.check_ext(
             io.EXT_ALL, os.path.basename(fname_co2), scan=True, remove=True
-        )
+        )[1]
         breakpoint()
         outprefix = os.path.join(outdir, basename_co2)
 
