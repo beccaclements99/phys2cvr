@@ -19,7 +19,11 @@ import numpy as np
 
 from phys2cvr import _version, io, signal, stats, utils
 from phys2cvr.cli.run import _check_opt_conf, _get_parser
-from phys2cvr.regressors import create_legendre, create_physio_regressor
+from phys2cvr.regressors import (
+    compute_petco2hrf,
+    create_legendre,
+    create_physio_regressor,
+)
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
@@ -451,7 +455,7 @@ def phys2cvr(
 
         outprefix = os.path.join(outdir, basename_co2)
 
-        petco2hrf = signal.compute_petco2hrf(
+        petco2hrf = compute_petco2hrf(
             co2, pidx, freq, outprefix, comp_endtidal, response_function
         )
 

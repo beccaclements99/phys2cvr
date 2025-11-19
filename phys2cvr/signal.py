@@ -17,7 +17,6 @@ import scipy.interpolate as spint
 import scipy.stats as sct
 from scipy.signal import butter, filtfilt
 
-from phys2cvr.io import load_array
 from phys2cvr.viz import plot_two_timeseries
 
 LGR = logging.getLogger(__name__)
@@ -124,32 +123,50 @@ def filter_signal(data, tr, lowcut=0.02, highcut=0.04, order=9, axis=-1):
     return filtfilt(a, b, data, axis=axis)
 
 
-def compute_petco2hrf(
-    co2, pidx, freq, outprefix, comp_endtidal=True, response_function='hfr', mode='full'
-):
+def endtidal_interpolation(signal, peaks, axis=-1):
     """
-    Create the PetCO2 trace from CO2 trace, then convolve it to obtain the PetCO2hrf.
+    Compute end-tidal interpolation of signal.
 
     Parameters
     ----------
-    co2 : np.ndarray
-        CO2 (or physiological) regressor
-    pidx : np.ndarray
-        Indices of peaks
-    freq : str, int, or float
-        Sample frequency of the CO2 regressor
-    outprefix : str
-        Prefix of the output file (i.e., the regressor of interest).
-    comp_endtidal : bool
-        If True, interpolate input regressor
-    response_function : {`hrf`, `rrf`, `crf`}, None, str, path, or 1D array-like , optional
+    signal : np.ndarray-like or list
+        The signal that needs to be interpolated
+    peaks : 1d array-like or list
+        The index of the peaks (or point of interest) to interpolate at.
+    axis : int, optional
+        The axis of signal to interpolate through. Default is last axis.
+
+    Returns
+    -------
+    IntETSignal
+        The end tidal interpolation of the signal
+
+    """
+    peaks = np.sort(np.unique(peaks))
+    nx = np.arange(signal.size)
+    f = spint.interp1d(peaks, signal[peaks], fill_value='extrapolate', axis=axis)
+    return f(nx)
+
+
+def convolve_signal(signal, freq, response_function='hrf', mode='full'):
+    """
+    Convolve provided signal with provided response function.
+
+    Parameters
+    ----------
+    signal : 1D np.ndarray or list
+        The signal to convolve
+    freq : int or float
+        The sampling frequency of `signal`
+    response_function : {`hrf`, `rrf`, `crf`, `icrf`}, None, str, path, or 1D array-like , optional
         Name of the response function to be used in the convolution of the regressor of
         interest or path to a 1D file containing one. Default is `hrf`.
         For `rrf` and `crf`, `phys2denoise` must be installed (see extra installs).
-            - `None` will skip the convolution
+            - `None` (or a string version of none) will skip the convolution
             - `hrf` will use an internally generated canonical HRF
             - `rrf` will use `phys2denoise`'s RRF
             - `crf` will use `phys2denoise`'s CRF
+            - `icrf` will use `phys2denoise`'s iCRF
             - Alternatively, specify a valid path file containing a custom one.
             - Alternatively, specify a custom one directly as np.ndarray or list.
     mode : {'full', 'valid', 'same'} str, optional
@@ -157,43 +174,27 @@ def compute_petco2hrf(
 
     Returns
     -------
-    petco2hrf : np.ndarray
-        Convolved PetCO2 trace.
+    colvolved_signal : 1D np.ndarray
+        The convolved version of `signal`.
 
     Raises
     ------
+    ImportError
+        If phys2denoise is not installed and RRF, CRF, or iCRF are called.
     NotImplementedError
-        If the provided CO2 is not a 1D array.
-        If the provided response function is not a supported option.
+        If signal has more than 1 dimension.
+        If response function is not of a supported type or was not found in system.
+    OSError
+        If response function is a path but it does not exist.
     ValueError
-        if the provided response function is not a numeric ndarray-like variable.
+        If the response function is a list or ndarray but is not numeric.
     """
-    co2 = co2.squeeze()
-    if co2.ndim > 1:
+    signal = signal.squeeze()
+    if signal.ndim > 2:
         raise NotImplementedError(
-            'Arrays with more than 2 dimensions are not supported.'
+            'Convolution on data that has more than 1 dimension is not supported yet.'
         )
-
-    if comp_endtidal:
-        nx = np.linspace(0, co2.size, co2.size)
-        f = spint.interp1d(pidx, co2[pidx], fill_value='extrapolate')
-        petco2 = f(nx)
-
-        # Plot PetCO2 vs CO2
-        plot_two_timeseries(
-            petco2, co2, f'{outprefix}_co2_vs_petco2.png', 'PetCO2', 'CO2', freq
-        )
-
-        # Demean and export
-        petco2 = petco2 - petco2.mean()
-        np.savetxt(f'{outprefix}_petco2.1D', petco2, fmt='%.18f')
-    else:
-        LGR.info(
-            'Skipping End Tidal interpolation of PetCO2 trace (if you provided raw CO2 '
-            'data, then you probably should not be doing this)'
-        )
-        petco2 = co2 - co2.mean()
-
+    # Check if RF is a string representing a path or a Nonetype
     if type(response_function) is str:
         if Path(response_function).exists():
             response_function = Path(response_function)
@@ -205,6 +206,7 @@ def compute_petco2hrf(
             )
 
     if type(response_function) in [list, np.ndarray]:
+        # Check if RF is or should be a 1darray-like
         convolving_function = (
             np.array(response_function)
             if type(response_function) is list
@@ -215,9 +217,8 @@ def compute_petco2hrf(
                 'Provided function is not a numeric ndarray-like variable.'
             )
     elif response_function is None:
-        LGR.info(
-            'Computing PetCO2 trace but skipping convolution with response function'
-        )
+        LGR.info('Skipping convolution with response function')
+        return signal
     elif response_function == 'hrf':
         convolving_function = create_hrf(freq)
     elif response_function == 'rrf':
@@ -228,7 +229,7 @@ def compute_petco2hrf(
                 'phys2denoise is required for the use of RRF response functions. '
                 'Please see install instructions.'
             )
-        convolving_function = rrf
+        convolving_function = rrf(1 / freq)
     elif response_function == 'crf':
         try:
             from phys2denoise.metrics.responses import crf
@@ -237,10 +238,22 @@ def compute_petco2hrf(
                 'phys2denoise is required for the use of CRF response functions. '
                 'Please see install instructions.'
             )
-        convolving_function = crf
+        convolving_function = crf(1 / freq)
+    elif response_function == 'icrf':
+        try:
+            from phys2denoise.metrics.responses import icrf
+        except ImportError:
+            raise ImportError(
+                'phys2denoise is required for the use of iCRF response functions. '
+                'Please see install instructions.'
+            )
+        convolving_function = icrf(1 / freq)
     elif type(response_function) is PosixPath:
         if not Path(response_function).exists():
             raise OSError(f'{response_function} not found in system.')
+        # Local import to avoid circularity
+        from .io import load_array  # noqa: ABS101
+
         convolving_function = load_array(response_function)
     else:
         raise NotImplementedError(
@@ -248,25 +261,14 @@ def compute_petco2hrf(
             'not found.'
         )
 
-    # Plot convolved PetCO2 vs PetCO2
-    if response_function is not None:
-        petco2hrf = np.convolve(petco2, convolving_function, mode=mode)
-        petco2hrf = np.interp(
-            petco2hrf, (petco2hrf.min(), petco2hrf.max()), (petco2.min(), petco2.max())
-        )
-        plot_two_timeseries(
-            petco2hrf,
-            petco2,
-            f'{outprefix}_petco2_vs_petco2hrf.png',
-            'Convolved PetCO2',
-            'PetCO2',
-            freq,
-        )
-    else:
-        LGR.info('Skipping convolution of PetCO2 trace')
-        petco2hrf = petco2
+    convolved_signal = np.convolve(signal, convolving_function, mode=mode)
+    convolved_signal = np.interp(
+        convolved_signal,
+        (convolved_signal.min(), convolved_signal.max()),
+        (signal.min(), signal.max()),
+    )
 
-    return petco2hrf
+    return convolved_signal
 
 
 def resample_signal_samples(ts, samples, axis=-1):

@@ -30,7 +30,7 @@ import nibabel as nib
 import numpy as np
 from peakdet.io import load_physio as load_pk_physio
 
-from phys2cvr import signal, utils
+from phys2cvr import utils
 
 EXT_1D = ['.txt', '.csv', '.tsv', '.1d', '.par', '.tsv.gz']
 EXT_MAT = ['.mat']
@@ -294,9 +294,10 @@ def export_regressor(
         Interpolated and demeaned version of `regressors_matrix` in the sampling of the
         fMRI data.
     """
-    regressors_matrix = signal.resample_signal_samples(
-        regressors_matrix, ntp, axis=axis
-    )
+    # Local import to avoid circularity
+    from .signal import resample_signal_samples  # noqa: ABS101
+
+    regressors_matrix = resample_signal_samples(regressors_matrix, ntp, axis=axis)
     regressors_demeaned = regressors_matrix - regressors_matrix.mean(
         axis=axis, keepdims=True
     )

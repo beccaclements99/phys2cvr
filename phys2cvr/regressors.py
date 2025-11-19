@@ -15,7 +15,11 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view as swv
 
 from phys2cvr.io import export_regressor
-from phys2cvr.signal import resample_signal_freqs
+from phys2cvr.signal import (
+    convolve_signal,
+    endtidal_interpolation,
+    resample_signal_freqs,
+)
 from phys2cvr.stats import x_corr
 from phys2cvr.viz import plot_two_timeseries, plot_xcorr
 
@@ -53,6 +57,83 @@ def create_legendre(degree, length):
     for n in range(degree + 1):
         legendre[:, n] = _bonnet(n, x)
     return legendre
+
+
+def compute_petco2hrf(
+    co2, pidx, freq, outprefix, comp_endtidal=True, response_function='hfr', mode='full'
+):
+    """
+    Create the PetCO2 trace from CO2 trace, then convolve it to obtain the PetCO2hrf.
+
+    Parameters
+    ----------
+    co2 : np.ndarray
+        CO2 (or physiological) regressor
+    pidx : np.ndarray
+        Indices of peaks
+    freq : str, int, or float
+        Sample frequency of the CO2 regressor
+    outprefix : str
+        Prefix of the output file (i.e., the regressor of interest).
+    comp_endtidal : bool
+        If True, interpolate input regressor
+    response_function : {`hrf`, `rrf`, `crf`}, None, str, path, or 1D array-like , optional
+        Name of the response function to be used in the convolution of the regressor of
+        interest or path to a 1D file containing one. Default is `hrf`.
+        See `.signal.convolve_signal` for more information.
+    mode : {'full', 'valid', 'same'} str, optional
+        Convolution mode, see numpy.convolve.
+
+    Returns
+    -------
+    petco2hrf : np.ndarray
+        Convolved PetCO2 trace.
+
+    Raises
+    ------
+    NotImplementedError
+        If the provided CO2 is not a 1D array.
+    """
+    co2 = co2.squeeze()
+    if co2.ndim > 1:
+        raise NotImplementedError(
+            'Arrays with more than 2 dimensions are not supported.'
+        )
+
+    if comp_endtidal:
+        petco2 = endtidal_interpolation(co2, pidx, axis=-1)
+
+        # Plot PetCO2 vs CO2
+        plot_two_timeseries(
+            petco2, co2, f'{outprefix}_co2_vs_petco2.png', 'PetCO2', 'CO2', freq
+        )
+
+        # Demean and export
+        petco2 = petco2 - petco2.mean()
+        np.savetxt(f'{outprefix}_petco2.1D', petco2, fmt='%.18f')
+    else:
+        LGR.info(
+            'Skipping End Tidal interpolation of PetCO2 trace (if you provided raw CO2 '
+            'data, then you probably should not be doing this)'
+        )
+        petco2 = co2 - co2.mean()
+
+    # Plot convolved PetCO2 vs PetCO2
+    if response_function not in [None, 'none', 'None', 'NONE']:
+        petco2hrf = convolve_signal(petco2, freq, response_function, mode)
+        plot_two_timeseries(
+            petco2hrf,
+            petco2,
+            f'{outprefix}_petco2_vs_petco2hrf.png',
+            'Convolved PetCO2',
+            'PetCO2',
+            freq,
+        )
+    else:
+        LGR.info('Skipping convolution of PetCO2 trace')
+        petco2hrf = petco2
+
+    return petco2hrf
 
 
 def compute_bulk_shift(
