@@ -303,8 +303,6 @@ def regression(
     mask = mask.astype(bool)
 
     Ymat = data[mask]
-    # Check that regr is 2D
-    regr = check_array_dim('regr', regr, shape='rectangle')
 
     if denoise_mat is not None:
         if regr.shape[0] != denoise_mat.shape[0]:

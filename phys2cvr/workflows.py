@@ -542,6 +542,7 @@ def phys2cvr(
 
         LGR.info('Compute simple CVR estimation (bulk shift only)')
         x1D = os.path.join(outdir, 'mat', 'mat_simple.1D')
+        regr = utils.check_array_dim('regr', regr, shape='rectangle')
         beta, tstat, r_square = stats.regression(
             func,
             regr,

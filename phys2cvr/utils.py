@@ -98,7 +98,7 @@ def check_ext(all_ext, fname, scan=False, remove=False):
     ext = ''.join(Path(fname).suffixes)
     LGR.debug(f'{fname} ends with extension {ext}')
 
-    has_ext = ext in all_ext
+    has_ext = True if ext in all_ext else False
 
     if not has_ext and scan:
         for ext in all_ext:
