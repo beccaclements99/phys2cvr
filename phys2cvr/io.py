@@ -237,9 +237,9 @@ def load_array(fname, shape=''):
     """
     _, _, ext = utils.check_ext(EXT_ARRAY, fname, scan=True, remove=True)
 
-    if ext in EXT_1D:
+    if ext.lower() in EXT_1D:
         return load_txt(fname, shape=shape)
-    if ext in EXT_MAT:
+    if ext.lower() in EXT_MAT:
         return load_mat(fname, shape=shape)
 
     raise NotImplementedError(
