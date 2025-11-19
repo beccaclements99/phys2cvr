@@ -6,8 +6,16 @@ Attributes
 ----------
 EXT_1D : list
     List of supported TXT/1D file extensions, in lower case.
+EXT_MAT : list
+    List of supported matlab file extensions, in lower case.
+EXT_ARRAY : list
+    List of supported 1D and 2D array-like file extensions, in lower case.
 EXT_NIFTI : list
     List of supported nifti file extensions, in lower case.
+EXT_GIFTI : list
+    List of supported gifti file extensions, in lower case.
+EXT_ALL : list
+    List of ALL supported file extensions, in lower case.
 FIGSIZE : tuple
     Figure size
 SET_DPI : int
@@ -17,226 +25,28 @@ LGR :
 """
 
 import logging
-from os.path import exists
-from pathlib import Path
 
 import nibabel as nib
 import numpy as np
+from peakdet.io import load_physio as load_pk_physio
 
-from phys2cvr import signal
+from phys2cvr import signal, utils
 
 SET_DPI = 100
 FIGSIZE = (18, 10)
 EXT_1D = ['.txt', '.csv', '.tsv', '.1d', '.par', '.tsv.gz']
+EXT_PHYS = ['.phys']
 EXT_MAT = ['.mat']
 # EXT_XLS = [".xls"]
 EXT_ARRAY = EXT_1D + EXT_MAT  # + EXT_XLS
 EXT_NIFTI = ['.nii', '.nii.gz']
 EXT_GIFTI = ['.gii', '.gii.gz']
-EXT_ALL = EXT_ARRAY + EXT_NIFTI + EXT_GIFTI
+EXT_NIMG = EXT_NIFTI + EXT_GIFTI
+EXT_ALL = EXT_ARRAY + EXT_PHYS + EXT_NIMG
 
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
-
-
-def if_declared_force_type(var, dtype, varname='an input variable', silent=False):
-    """
-    Make sure `var` is of type `dtype`.
-
-    Parameters
-    ----------
-    var : str, int, or float
-        Variable to change type of
-    dtype : str
-        Type to change `var` to
-    varname : str, optional
-        The name of the variable
-    silent : bool, optional
-        If True, don't return any message
-
-    Returns
-    -------
-    int, float, str, list, or var
-        The given `var` in the given `dtype`, or `var` if '' or None
-
-    Raises
-    ------
-    NotImplementedError
-        If dtype is not 'int', 'float', 'str', or 'list'
-    """
-    if var:
-        if dtype == 'int':
-            tmpvar = int(var)
-        elif dtype == 'float':
-            tmpvar = float(var)
-        elif dtype == 'str':
-            tmpvar = str(var)
-        elif dtype == 'list':
-            if type(var) is list:
-                tmpvar = var
-            else:
-                tmpvar = [var]
-        else:
-            raise NotImplementedError(f'Type {dtype} not supported')
-
-        if not silent:
-            if type(tmpvar) is not type(var):
-                if varname != 'an input variable':
-                    varname = f'variable {varname}'
-
-                LGR.warning(f'Changing type of {varname} from {type(var)} to {dtype}')
-
-        return tmpvar
-
-    else:
-        return var
-
-
-def check_ext(all_ext, fname, scan=False, remove=False):
-    """Check which extension a file has, and possibly remove it.
-
-    Parameters
-    ----------
-    all_ext : list
-        All possible extensions to check within.
-    fname : str or os.PathLike
-        The filename to check.
-    scan : bool, optional
-        Scan the given path to see if there is a file with that extension
-        If True and no path declared, check if fname has a path, if not scan '.'
-        If False, don't scan any folder.
-    remove : bool, optional
-        Remove the extension from fname if it has one.
-
-    Returns
-    -------
-    obj_return : Uses a list to return variable amount of options.
-        has_ext : boolean
-            True if the extension is found, false otherwise.
-        fname : str or os.PathLike
-            If ``remove`` is True, return (extensionless) fname.
-        ext : str
-            If both ``remove`` and ``has_ext`` are True, returns also found extension.
-    """
-    all_ext = if_declared_force_type(all_ext, 'list', silent=True)
-
-    ext = ''.join(Path(fname).suffixes)
-
-    LGR.debug(f'{fname} ends with extension {ext}')
-
-    has_ext = True if ext in all_ext else False
-
-    if not has_ext and scan:
-        for ext in all_ext:
-            if exists(f'{fname}{ext}'):
-                fname = f'{fname}{ext}'
-                LGR.warning(f'Found {fname}{ext}, using it as input henceforth')
-                has_ext = True
-                break
-
-    obj_return = [has_ext]
-
-    if remove:
-        obj_return += [
-            fname[: -len(ext)],
-            None if ext == '' else ext,
-        ]  # case insensitive solution
-    else:
-        obj_return += [fname]
-
-    return obj_return[:]
-
-
-def check_nifti_dim(fname, data, dim=4):
-    """
-    Remove extra dimensions.
-
-    Parameters
-    ----------
-    fname : str
-        The name of the file representing `data`
-    data : np.ndarray
-        The data which dimensionality needs to be checked
-    dim : int, optional
-        The amount of dimensions expected/desired in the data.
-
-    Returns
-    -------
-    np.ndarray
-        If `len(data.shape)` = `dim`, returns data.
-        If `len(data.shape)` > `dim`, returns a version of data without the
-        dimensions above `dim`.
-
-    Raises
-    ------
-    ValueError
-        If `data` has less dimensions than `dim`
-    """
-    if len(data.shape) < dim:
-        raise ValueError(
-            f'A {dim}D nifti file is required, but {fname} has {data.ndim}D. Please '
-            'check the input file.'
-        )
-    if len(data.shape) > dim:
-        LGR.warning(f'{fname} has more than {dim} dimensions. Removing D > {dim}.')
-        for ax in range(dim, len(data.shape)):
-            data = np.delete(data, np.s_[1:], axis=ax)
-
-    return np.squeeze(data)
-
-
-def check_array_dim(fname, data, shape=None):
-    """Check dimensions of a matrix.
-
-    For future 3D implementation, check MIPLabCH/nigsp's check_array_dim.
-
-    Parameters
-    ----------
-    fname : str
-        The name of the file representing ``data``.
-    data : np.ndarray
-        The data which dimensionality needs to be checked.
-    shape : None | ``'square'`` | ``'rectangle'``
-        Shape of matrix, if empty, skip shape check.
-
-    Returns
-    -------
-    np.ndarray
-        If ``data.ndim = 2``, returns data.
-        If ``data.ndim = 1`` and ``shape == 'rectangle'``, returns data with added empty
-        axis.
-
-    Raises
-    ------
-    NotImplementedError
-        If ``data`` has more than 2 dimensions.
-    ValueError
-        If ``data`` is empty
-        If ``shape == 'square'`` and ``data`` dimensions have different lengths.
-    """
-    data = data.squeeze()
-    LGR.info('Checking data shape.')
-
-    if data.shape[0] == 0:
-        raise ValueError(f'{fname} is empty!')
-    if data.ndim > 2:
-        raise NotImplementedError(
-            f'Only matrices up to 2D are supported, but given matrix is {data.ndim}D.'
-        )
-    if shape is not None:
-        if data.ndim == 1 and shape == 'rectangle':
-            data = data[..., np.newaxis]
-            LGR.warning(
-                f'Rectangular matrix required, but {fname} is a vector. '
-                'Adding empty dimension.'
-            )
-        if shape == 'square' and data.shape[0] != data.shape[1]:
-            raise ValueError(
-                f'Square matrix required, but {fname} matrix has shape {data.shape}.'
-            )
-
-    return data
 
 
 def load_nifti_get_mask(fname, is_mask=False, dim=3):
@@ -268,20 +78,15 @@ def load_nifti_get_mask(fname, is_mask=False, dim=3):
         Image object from nibabel.
     """
     img = nib.load(fname)
-
     LGR.info(f'Loading {fname}')
 
-    if check_ext(EXT_GIFTI, fname)[0]:
+    if utils.check_ext(EXT_GIFTI, fname)[0]:
         data = img.agg_data().transpose()
     else:
         data = img.get_fdata()
 
-    data = check_nifti_dim(fname, data, dim=dim)
-
-    if is_mask:
-        mask = data != 0
-    else:
-        mask = data.any(axis=-1).squeeze()
+    data = utils.check_nifti_dim(fname, data, dim=dim)
+    mask = (data != 0) if is_mask else data.any(axis=-1).squeeze()
 
     return data, mask, img
 
@@ -303,26 +108,23 @@ def load_txt(fname, shape=None):
 
     See Also
     --------
-    check_array_dim
+    utils.check_array_dim
     """
     LGR.info(f'Loading {fname}.')
+    _, _, ext = utils.check_ext(EXT_1D, fname, scan=True, remove=True)
 
-    _, _, ext = check_ext(EXT_1D, fname, scan=True, remove=True)
+    delimiter_map = {
+        '.csv': ',',
+        '.csv.gz': ',',
+        '.tsv': '\t',
+        '.tsv.gz': '\t',
+        '.txt': ' ',
+        '.1d': ' ',
+        '.par': ' ',
+    }
 
-    if ext in ['.csv', '.csv.gz']:
-        delimiter = ','
-    elif ext in ['.tsv', '.tsv.gz']:
-        delimiter = '\t'
-    elif ext in ['.txt', '.1d', '.par']:
-        delimiter = ' '
-    else:
-        delimiter = None
-
-    mtx = np.genfromtxt(fname, delimiter=delimiter)
-
-    mtx = check_array_dim(fname, mtx, shape)
-
-    return mtx
+    mtx = np.genfromtxt(fname, delimiter=delimiter_map.get(ext))
+    return utils.check_array_dim(fname, mtx, shape)
 
 
 def load_mat(fname, shape=None):
@@ -350,7 +152,7 @@ def load_mat(fname, shape=None):
 
     See Also
     --------
-    check_array_dim
+    utils.check_array_dim
 
     Raises
     ------
@@ -363,8 +165,7 @@ def load_mat(fname, shape=None):
         from pymatreader import read_mat
     except ImportError:
         raise ImportError(
-            'pymatreader is required to import mat files. '
-            'Please see install instructions.'
+            'pymatreader is required to import mat files. Please see install instructions.'
         )
 
     LGR.info(f'Loading {fname}.')
@@ -382,24 +183,15 @@ def load_mat(fname, shape=None):
             if type(data[k]) is np.ndarray:
                 data_keys.append(k)
 
-    if len(data_keys) < 1:
+    if not data_keys:
         raise EOFError(f'{fname} does not seem to contain a numeric matrix.')
-    elif len(data_keys) > 1:
-        LGR.warning(
-            'Found multiple possible arrays to load. '
-            'Selecting the biggest (highest pythonic size).'
-        )
+    if len(data_keys) > 1:
+        LGR.warning('Found multiple possible arrays to load. Selecting the biggest.')
 
-    key = data_keys[0]
-    for k in data_keys[1:]:
-        if data[k].size > data[key].size:
-            key = k
-
+    key = max(data_keys, key=lambda k: data[k].size)
     LGR.info(f'Selected data from MATLAB variable {key}')
-    mtx = data[key]
-    mtx = check_array_dim(fname, mtx, shape)
 
-    return mtx
+    return utils.check_array_dim(fname, data[key], shape)
 
 
 def load_xls(fname, shape=''):
@@ -414,7 +206,7 @@ def load_xls(fname, shape=''):
 
     See Also
     --------
-    check_array_dim
+    utils.check_array_dim
 
     Raises
     ------
@@ -436,27 +228,45 @@ def load_array(fname, shape=''):
 
     See Also
     --------
-    check_array_dim
+    utils.check_array_dim
 
     Raises
     ------
     NotImplementedError
         Spreadheet loading is not implemented yet.
     """
-    _, _, ext = check_ext(EXT_ARRAY, fname, scan=True, remove=True)
+    _, _, ext = utils.check_ext(EXT_ARRAY, fname, scan=True, remove=True)
 
-    if ext in EXT_1D:
-        mtx = load_txt(fname, shape=shape)
-    elif ext in EXT_MAT:
-        mtx = load_mat(fname, shape=shape)
-    # elif ext in EXT_XLS:
-    #     mtx = load_xls(fname, shape=shape)
-    else:
-        raise NotImplementedError(
-            f'{fname} file extension {ext} was not found or is not supported yet'
-        )
+    if ext.lower() in EXT_1D:
+        return load_txt(fname, shape=shape)
+    if ext.lower() in EXT_MAT:
+        return load_mat(fname, shape=shape)
 
-    return mtx
+    raise NotImplementedError(
+        f'{fname} file extension {ext} was not found or is not supported yet'
+    )
+
+
+def load_physio(fname):
+    """Read peakdet and physiopy objects.
+
+    Parameters
+    ----------
+    fname : str | os.PathLike
+        Path to the xls file.
+
+    Returns
+    -------
+    np.ndarray
+        The physiological data
+    np.ndarray
+        The indexes of peaks
+    np.float
+        The sampling frequency
+    """
+    phys = load_pk_physio(fname, allow_pickle=True)
+
+    return phys.data, phys.peaks, phys.fs
 
 
 def export_regressor(
@@ -493,7 +303,6 @@ def export_regressor(
         axis=axis, keepdims=True
     )
     np.savetxt(f'{outname}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
-
     return regressors_demeaned
 
 
@@ -511,7 +320,6 @@ def export_nifti(data, img, fname):
         Name of the output file
     """
     klass = img.__class__
-
     out_img = klass(data, img.affine, img.header)
     out_img.to_filename(fname)
 

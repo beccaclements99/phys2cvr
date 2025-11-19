@@ -16,15 +16,10 @@ def _get_parser():
     """
     parser = argparse.ArgumentParser(
         description=(
-            '%(prog)s, a tool to compute '
-            'Cerebrovascular Reactivity '
-            'maps and their lags.\n'
-            '%(prog)s is compatible with '
-            'different designs and techniques '
-            'to estimate CVR maps.'
-            'It can also be used to generate '
-            'regressors to run the estimation '
-            'with other software.\n'
+            '%(prog)s, a tool to compute Cerebrovascular Reactivity maps and their '
+            'lags.\n%(prog)s is compatible with different designs and techniques to '
+            'estimate CVR maps. It can also be used to generate regressors to run the '
+            'estimation with other software.\n'
             f'Version {__version__}'
         ),
         add_help=False,
@@ -36,10 +31,9 @@ def _get_parser():
         dest='fname_func',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of the file containing fMRI signal. This file '
-            'can be a nifti-like file, a gifti file, a .mat file, or a txt-like file. '
-            'Any filetype supported by nibabel should be supported.'
+            'Complete path (absolute or relative) and name of the file containing fMRI '
+            'signal. This file can be a nifti-like file, a gifti file, a .mat file, or '
+            'a txt-like file. Any filetype supported by nibabel should be supported.'
         ),
         required=True,
     )
@@ -51,12 +45,10 @@ def _get_parser():
         dest='outdir',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of the desired output directory. If it does not '
-            'exist, it will be created. If it is not '
-            'specified, a folder named "phys2cvr" will be '
-            'created in the folder containing the functional '
-            'file.'
+            'Complete path (absolute or relative) and name of the desired output '
+            'directory. If it does not exist, it will be created. If it is not '
+            'specified, a folder named "phys2cvr" will be created in the folder '
+            'containing the functional file.'
         ),
         default=None,
     )
@@ -68,16 +60,12 @@ def _get_parser():
         dest='fname_mask',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of the file containing a brain mask (nifti file). '
-            'Only the voxels in this mask will be considered '
-            'by phys2cvr. Use this option to '
-            'specify a GM mask or overwrite a full brain mask.\n'
-            'If the functional file is specified and this '
-            'option is not used, or the mask cannot be '
-            'loaded, the program will create a mask using '
-            'any voxel of the functional file constantly '
-            'different from zero.'
+            'Complete path (absolute or relative) and name of the file containing a '
+            'brain mask (nifti file). Only the voxels in this mask will be considered '
+            'by phys2cvr. Use this option to specify a GM mask or overwrite a full '
+            'brain mask.\nIf the functional file is specified and this option is not '
+            'used, or the mask cannot be loaded, the program will create a mask using '
+            'any voxel of the functional file constantly different from zero.'
         ),
         default=None,
     )
@@ -87,19 +75,14 @@ def _get_parser():
         dest='fname_roi',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of the nifti file containing a subset of voxels to '
-            'treat as a region of interest (ROI). '
-            'The average functional signal of the ROI will be used '
-            'to run the cross correlation with the '
-            'physiological regressor. The median lag value in '
-            'the ROI will be used to correct the final lag map.\n'
-            'If the functional file is specified and this '
-            'option is not used, or the ROI cannot be '
-            'loaded, the program will either use a specified mask '
-            '(see `--input-mask`) or create a mask using '
-            'any voxel of the functional file constantly '
-            'different from zero.'
+            'Complete path (absolute or relative) and name of the nifti file containing '
+            'a subset of voxels to treat as a region of interest (ROI). The average '
+            'functional signal of the ROI will be used to run the cross correlation '
+            'with the physiological regressor. The median lag value in the ROI will be '
+            'used to correct the final lag map.\nIf the functional file is specified '
+            'and this option is not used, or the ROI cannot be loaded, the program will '
+            'either use a specified mask (see `--input-mask`) or create a mask using '
+            'any voxel of the functional file constantly different from zero.'
         ),
         default=None,
     )
@@ -109,10 +92,8 @@ def _get_parser():
         dest='tr',
         type=float,
         help=(
-            'TR of functional data. Required '
-            'if the latter is not passed as a nifti file. '
-            'Use this option to overwrite the frequency of a '
-            'nifti file.'
+            'TR of functional data. Required if the latter is not passed as a nifti '
+            'file. Use this option to overwrite the frequency of a nifti file.'
         ),
         default=None,
     )
@@ -126,13 +107,11 @@ def _get_parser():
         dest='fname_co2',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of the file containing CO2 signal (or equivalent '
-            'physiological trace to compute the regressor). '
-            'This file can be a 1D txt-like file, a .mat file, or a .phys file '
-            'from peakdet.\n If nothing is specified, the '
-            'average timeseries of the mask will be used '
-            'as regressor.'
+            'Complete path (absolute or relative) and name of the file containing CO2 '
+            'signal (or equivalent physiological trace to compute the regressor). This '
+            'file can be a 1D txt-like file, a .mat file, or a .phys file from '
+            'peakdet.\n If nothing is specified, the average timeseries of the mask '
+            'will be used as regressor.'
         ),
         default=None,
     )
@@ -142,12 +121,10 @@ def _get_parser():
         dest='fname_pidx',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of the file containing the peak of the '
-            'physiological trace. Required if the physiological '
-            'trace file is not a .phys file.\n'
-            'Use this option to overwrite the peaks specified '
-            'in the .phys file.'
+            'Complete path (absolute or relative) and name of the file containing the '
+            'peak of the physiological trace. Required if the physiological trace file '
+            'is not a .phys file.\nUse this option to overwrite the peaks specified in '
+            'the .phys file.'
         ),
         default=None,
     )
@@ -157,10 +134,8 @@ def _get_parser():
         dest='freq',
         type=float,
         help=(
-            'Frequency of the physiological trace. Required '
-            'if the latter is not passed as a .phys file.\n'
-            'Use this option to overwrite the frequency of a '
-            '.phys file.'
+            'Frequency of the physiological trace. Required if the latter is not passed '
+            'as a .phys file.\nUse this option to overwrite the frequency of a .phys file.'
         ),
         default=None,
     )
@@ -174,12 +149,10 @@ def _get_parser():
         dest='trial_len',
         type=float,
         help=(
-            'Total duration of a single trial of the task '
-            'in seconds (useful for block designs).\n'
-            'Specify this with the number of trials to run '
-            'a double cross-correlation between functional '
-            'signal and physiological regressor to improve '
-            'the detection of the bulk shift.'
+            'Total duration of a single trial of the task in seconds (useful for block '
+            'designs).\nSpecify this with the number of trials to run a double '
+            'cross-correlation between functional signal and physiological regressor to '
+            'improve the detection of the bulk shift.'
         ),
         default=None,
     )
@@ -189,11 +162,10 @@ def _get_parser():
         dest='n_trials',
         type=int,
         help=(
-            'Number of trials in the task (useful for block designs).\n'
-            'Specify this with the duration of trials to run '
-            'a double cross-correlation between functional '
-            'signal and physiological regressor to improve '
-            'the detection of the bulk shift.'
+            'Number of trials in the task (useful for block designs).\nSpecify this '
+            'with the duration of trials to run a double cross-correlation between '
+            'functional signal and physiological regressor to improve the detection of '
+            'the bulk shift.'
         ),
         default=None,
     )
@@ -203,10 +175,9 @@ def _get_parser():
         dest='abs_xcorr',
         action='store_true',
         help=(
-            'Allow cross correlation to consider both '
-            'positive and negative values as possible '
-            'maximum, i.e. to consider the maximum of the '
-            'absolute of the cross correlation.'
+            'Allow cross correlation to consider both positive and negative values as '
+            'possible maximum, i.e. to consider the maximum of the absolute of the '
+            'cross correlation.'
         ),
         default=False,
     )
@@ -226,11 +197,10 @@ def _get_parser():
         dest='apply_filter',
         action='store_true',
         help=(
-            'Apply a filter to the functional data before '
-            'estimating the bulk shift. The filter will not '
-            'be applied on the data before the GLM computation. '
-            'If you want that, consider applying it before '
-            'running %(prog)s (or running it a second time).'
+            'Apply a filter to the functional data before estimating the bulk shift. '
+            'The filter will not be applied on the data before the GLM computation. If '
+            'you want that, consider applying it before running %(prog)s (or running it '
+            'a second time).'
         ),
         default=False,
     )
@@ -240,10 +210,9 @@ def _get_parser():
         dest='highcut',
         type=float,
         help=(
-            'Higher frequency to use in signal filtering. '
-            'The filter will be applied only to the functional '
-            'data to estimate the bulk shift. This option '
-            'is suggested when only using a functional file.'
+            'Higher frequency to use in signal filtering. The filter will be applied '
+            'only to the functional data to estimate the bulk shift. This option is '
+            'suggested when only using a functional file.'
         ),
         default=None,
     )
@@ -253,10 +222,9 @@ def _get_parser():
         dest='lowcut',
         type=float,
         help=(
-            'Lower frequency to use in signal filtering. '
-            'The filter will be applied only to the functional '
-            'data to estimate the bulk shift. This option '
-            'is suggested when only using a functional file.'
+            'Lower frequency to use in signal filtering. The filter will be applied '
+            'only to the functional data to estimate the bulk shift. This option is '
+            'suggested when only using a functional file.'
         ),
         default=None,
     )
@@ -276,12 +244,10 @@ def _get_parser():
         dest='run_regression',
         action='store_false',
         help=(
-            'Skip running physiological regression(s) '
-            'internally. This will make %(prog)s '
-            'generate the desired physiological regressors '
-            'and quit, assuming that the regression itself '
-            'will be carried out with other software '
-            '(e.g. AFNI, FSL, ...).'
+            'Skip running physiological regression(s) internally. This will make '
+            '%(prog)s generate the desired physiological regressors and quit, assuming '
+            'that the regression itself will be carried out with other software (e.g. '
+            'AFNI, FSL, ...).'
         ),
         default=True,
     )
@@ -291,29 +257,28 @@ def _get_parser():
         dest='lagged_regression',
         action='store_false',
         help=(
-            'Skip estimating the lagged regressors, '
-            'estimating only the bulk shifted one.\n'
-            'Skip running the lagged regression if the '
-            'regression step is run.'
+            'Skip estimating the lagged regressors, estimating only the bulk shifted '
+            'one.\nSkip running the lagged regression if the regression step is run.'
         ),
         default=True,
     )
     opt_flow.add_argument(
-        '-spco2',
-        '--skip-petco2hrf',
-        dest='comp_petco2hrf',
+        '-skip_endtidal',
+        '--skip-endtidal-interpolation',
+        dest='comp_endtidal',
         action='store_false',
         help=(
-            'Skip the creation of the PetCO2hrf trace. '
-            'By default %(prog)s convolves a physiological '
-            'trace with a standard HRF. Skip it when using '
-            'fMRI signal only or a pre-computed regressor.'
+            'Skip the end-tidal interpolation of the physiological trace.'
+            'By default, %(prog)s linearly interpolate the peaks of the physiological '
+            'trace. Use this option if providing a physiological trace that does not '
+            'need interpolation or a previously computed trace.'
         ),
         default=True,
     )
 
     title_opt_response_function = parser.add_argument_group(
-        'Optional Arguments to select a response function to convolve the signal of interest (e.g. PetCO2 trace)'
+        'Optional Arguments to select a response function to convolve the signal of '
+        'interest (e.g. PetCO2 trace)'
     )
     opt_response_function = title_opt_response_function.add_mutually_exclusive_group()
 
@@ -335,8 +300,8 @@ def _get_parser():
         action='store_const',
         const='rrf',
         help=(
-            'Use a RRF (Respiratory Response Function) to convolve the signal of interest. '
-            'Requires phys2denoise to be installed.'
+            'Use a RRF (Respiratory Response Function) to convolve the signal of '
+            'interest. Requires phys2denoise to be installed.'
         ),
         default='hrf',
     )
@@ -361,6 +326,17 @@ def _get_parser():
         help=('Do NOT convolve the signal of interest with a response function.'),
         default='hrf',
     )
+    opt_response_function.add_argument(
+        '-rfpath',
+        '--response-function-path',
+        dest='response_function',
+        type=str,
+        help=(
+            'Use a pre-generated response function from a file (which full path  has to '
+            'be given after the flag.'
+        ),
+        default='hrf',
+    )
 
     title_opt_r2model = parser.add_argument_group(
         'Optional Arguments to select R^2 model for regression step'
@@ -381,8 +357,8 @@ def _get_parser():
         action='store_const',
         const='partial',
         help=(
-            'Use partial R^2 of the regressor of interest, i.e. compare '
-            'versus any other regressor'
+            'Use partial R^2 of the regressor of interest, i.e. compare versus any '
+            'other regressor'
         ),
         default=None,
     )
@@ -392,9 +368,8 @@ def _get_parser():
         action='store_const',
         const='intercept',
         help=(
-            'Use full R^2 of the model but the intercept, i.e. compare '
-            'versus baseline intercept (Legendre polynomial order 0, '
-            'a.k.a. average signal)'
+            'Use full R^2 of the model but the intercept, i.e. compare versus baseline '
+            'intercept (Legendre polynomial order 0, a.k.a. average signal)'
         ),
         default=None,
     )
@@ -403,7 +378,7 @@ def _get_parser():
         dest='r2model',
         action='store_const',
         const='adj_full',
-        help=("Same as 'full', but adjusted"),
+        help=('Same as "full", but adjusted'),
         default=None,
     )
     opt_r2model.add_argument(
@@ -411,7 +386,7 @@ def _get_parser():
         dest='r2model',
         action='store_const',
         const='adj_partial',
-        help=("Same as 'partial', but adjusted"),
+        help=('Same as "partial", but adjusted'),
         default=None,
     )
     opt_r2model.add_argument(
@@ -419,7 +394,7 @@ def _get_parser():
         dest='r2model',
         action='store_const',
         const='adj_intercept',
-        help=("Same as 'intercept', but adjusted"),
+        help=('Same as "intercept", but adjusted'),
         default=None,
     )
 
@@ -430,9 +405,9 @@ def _get_parser():
         dest='l_degree',
         type=int,
         help=(
-            'Maximum legendre degree to add to the regression '
-            'matrix as nuisance. Default is 0, to account for '
-            'the degree of freedom lost in computing the SPC.'
+            'Maximum legendre degree to add to the regression matrix as nuisance. '
+            'Default is 0, to account for the degree of freedom lost in computing the '
+            'SPC.'
         ),
         default=0,
     )
@@ -443,12 +418,10 @@ def _get_parser():
         nargs='*',
         type=str,
         help=(
-            'Complete path (absolute or relative) and filename '
-            'of denoising matrices to add to the regression model. '
-            'This option can be specified multiple times to '
-            'add multiple denoising matrices, but multiple '
-            'denoising matrices can be specified one after '
-            'the other, separated by a space.'
+            'Complete path (absolute or relative) and filename of denoising matrices to '
+            'add to the regression model. This option can be specified multiple times '
+            'to add multiple denoising matrices, but multiple denoising matrices can be '
+            'specified one after the other, separated by a space.'
         ),
         default=None,
     )
@@ -459,14 +432,12 @@ def _get_parser():
         nargs='*',
         type=str,
         help=(
-            'Complete path (absolute or relative) and filename '
-            'of denoising matrices to add to the regression model, '
-            'but only after they have been orthogonalised w.r.t. '
-            'denoising matrices and extra matrices (-dmat and -emat '
-            'flags). This option can be specified multiple times to '
-            'add multiple matrices, but multiple '
-            'matrices can be specified one after '
-            'the other, separated by a space.'
+            'Complete path (absolute or relative) and filename of denoising matrices to '
+            'add to the regression model, but only after they have been orthogonalised '
+            'w.r.t. denoising matrices and extra matrices (-dmat and -emat flags). This '
+            'option can be specified multiple times to add multiple matrices, but '
+            'multiple matrices can be specified one after the other, separated by a '
+            'space.'
         ),
         default=None,
     )
@@ -477,14 +448,12 @@ def _get_parser():
         nargs='*',
         type=str,
         help=(
-            'Complete path (absolute or relative) and filename '
-            'of matrices to use to orthogonalise other denoising matrices with. '
-            'These matrices will not be added as regressors in the regression, '
-            'but only used for orthogonalisation purposes.'
-            'This option can be specified multiple times to '
-            'add multiple matrices, but multiple '
-            'matrices can be specified one after '
-            'the other, separated by a space.'
+            'Complete path (absolute or relative) and filename of matrices to use to '
+            'orthogonalise other denoising matrices with. These matrices will not be '
+            'added as regressors in the regression, but only used for orthogonalisation '
+            'purposes. This option can be specified multiple times to add multiple '
+            'matrices, but multiple matrices can be specified one after the other, '
+            'separated by a space.'
         ),
         default=None,
     )
@@ -494,12 +463,10 @@ def _get_parser():
         dest='scale_factor',
         type=float,
         help=(
-            'Scale factor by which the beta maps will be divided '
-            'to create the CVR map output. Since BIDS '
-            'currently does not support mmHg as unit, if '
-            'using CO2 traces check their unit of measure '
-            'and their scaling factor to transform Volts into '
-            'mmHg. Use this option for other standardisations too.'
+            'Scale factor by which the beta maps will be divided to create the CVR map '
+            'output. Since BIDS currently does not support mmHg as unit, if using CO2 '
+            'traces check their unit of measure and their scaling factor to transform '
+            'Volts into mmHg. Use this option for other standardisations too.'
         ),
         default=None,
     )
@@ -511,12 +478,10 @@ def _get_parser():
         dest='lag_max',
         type=float,
         help=(
-            'Maximum lag to consider during lag regression '
-            'in seconds. The same lag will be considered in '
-            'both directions.\n'
-            'Despite the code being python, the upper limit '
-            'is included in the computation. E.g. -lm 9 '
-            '-ls .3 means [-9, +9] (61 regressors).'
+            'Maximum lag to consider during lag regression in seconds. The same lag '
+            'will be considered in both directions.\nDespite the code being python, the '
+            'upper limit is included in the computation. E.g. -lm 9 -ls .3 means '
+            '[-9, +9] (61 regressors).'
         ),
         default=None,
     )
@@ -526,8 +491,8 @@ def _get_parser():
         dest='lag_step',
         type=float,
         help=(
-            'Lag step to consider during lagged regression '
-            'in seconds. Default is 0.3 seconds.'
+            'Lag step to consider during lagged regression in seconds. Default is 0.3 '
+            'seconds.'
         ),
         default=None,
     )
@@ -536,9 +501,9 @@ def _get_parser():
         dest='legacy',
         action='store_true',
         help=(
-            'Use pythonic ranges, i.e. the upper limit '
-            'is excluded from the computation.\nE.g. -lm 9 '
-            '-ls .3 means [-9, +8.7] or [-9, +9) (60 regressors).'
+            'Use pythonic ranges, i.e. the upper limit is excluded from the '
+            'computation.\nE.g. -lm 9 -ls .3 means [-9, +8.7] or [-9, +9) '
+            '(60 regressors).'
         ),
         default=False,
     )
@@ -554,9 +519,8 @@ def _get_parser():
         dest='lag_map',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of a previously computed lag map to use in '
-            'lagged regression.'
+            'Complete path (absolute or relative) and name of a previously computed lag '
+            'map to use in lagged regression.'
         ),
         default=None,
     )
@@ -566,9 +530,8 @@ def _get_parser():
         dest='regr_dir',
         type=str,
         help=(
-            'Complete path (absolute or relative) and name '
-            'of previously computed lagged regressors to '
-            'use in a new lagged regression.'
+            'Complete path (absolute or relative) and name of previously computed '
+            'lagged regressors to use in a new lagged regression.'
         ),
         default=None,
     )
@@ -584,13 +547,10 @@ def _get_parser():
         action='store_const',
         const='brightspin',
         help=(
-            'Estimate CVR using a specific set of L-GLM parameters, '
-            'as used in:\n'
-            "S. Moia, et al., 'ICA-based denoising strategies in "
-            'breath-hold induced cerebrovascular reactivity mapping '
-            "with multi echo BOLD fMRI' (2021), NeuroImage.\n"
-            'Same as setting --lag-max 9 --lag-step 0.3 '
-            '--legacy --r2full'
+            'Estimate CVR using a specific set of L-GLM parameters, as used in:\nS. '
+            'Moia, et al., "ICA-based denoising strategies in breath-hold induced '
+            'cerebrovascular reactivity mapping with multi echo BOLD fMRI" (2021), '
+            'NeuroImage.\nSame as setting --lag-max 9 --lag-step 0.3 --legacy --r2full'
         ),
         default=None,
     )
@@ -600,8 +560,8 @@ def _get_parser():
         action='store_const',
         const='brightspin-clinical',
         help=(
-            'Like "brightspin", but use a larger lag range.\n'
-            'Same as setting --lag-max 20 --lag-step 0.3 --r2full'
+            'Like "brightspin", but use a larger lag range.\nSame as setting --lag-max '
+            '20 --lag-step 0.3 --r2full'
         ),
         default=None,
     )
@@ -611,11 +571,10 @@ def _get_parser():
         action='store_const',
         const='baltimore',
         help=(
-            'Estimate CVR using the average timeseries in the '
-            '0.02-0.04 frequency spectrum, as used in:\n'
-            "P. Liu, et al., 'Cerebrovascular reactivity "
-            "mapping without gas challenges' (2017), NeuroImage.\n"
-            'Same as setting --apply-filter -hf 0.04 -lf 0.02 '
+            'Estimate CVR using the average timeseries in the 0.02-0.04 frequency '
+            'spectrum, as used in:\nP. Liu, et al., "Cerebrovascular reactivity mapping '
+            'without gas challenges" (2017), NeuroImage.\nSame as setting '
+            '--apply-filter -hf 0.04 -lf 0.02 '
             "-skip_conv -skip_lagreg -co2 '' "
         ),
         default=None,
@@ -626,8 +585,8 @@ def _get_parser():
         action='store_const',
         const='baltimore-lag',
         help=(
-            'Like "baltimore", but use a L-GLM instead.\n'
-            'Same as setting --apply-filter -hf 0.04 -lf 0.02 '
+            'Like "baltimore", but use a L-GLM instead.\nSame as setting --apply-filter '
+            '-hf 0.04 -lf 0.02 '
             "-skip_conv -co2 '' "
         ),
         default=None,
@@ -722,7 +681,7 @@ def _check_opt_conf(parser):
         else:
             raise NotImplementedError(
                 f'{parser.workflow_config} is not configured. '
-                "In fact, you shouldn't see this message at all."
+                'In fact, you should not see this message at all.'
             )
 
     if parser.r2model is None:
@@ -734,9 +693,8 @@ def _check_opt_conf(parser):
 
 if __name__ == '__main__':
     raise RuntimeError(
-        'phys2cvr/cli/run.py should not be run directly;\n'
-        'Please `pip install` phys2cvr and use the '
-        '`phys2cvr` command'
+        'phys2cvr/cli/run.py should not be run directly;\n Please `pip install` '
+        'phys2cvr and use the `phys2cvr` command'
     )
 
 

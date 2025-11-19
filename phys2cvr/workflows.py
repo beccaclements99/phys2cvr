@@ -16,41 +16,13 @@ from copy import deepcopy
 
 import nibabel as nib
 import numpy as np
-from peakdet.io import load_physio
 
-from phys2cvr import _version, io, signal, stats
+from phys2cvr import _version, io, signal, stats, utils
 from phys2cvr.cli.run import _check_opt_conf, _get_parser
-from phys2cvr.io import EXT_ARRAY
 from phys2cvr.regressors import create_legendre, create_physio_regressor
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
-
-
-def save_bash_call(fname, outdir):
-    """
-    Save the bash call into file `p2d_call.sh`.
-
-    Parameters
-    ----------
-    fname : str or path
-        Name of or path to functional file
-    outdir : str or path
-        Output directory
-    """
-    arg_str = ' '.join(sys.argv[1:])
-    call_str = f'phys2cvr {arg_str}'
-    if outdir:
-        outdir = os.path.abspath(outdir)
-    else:
-        outdir = os.path.join(os.path.split(fname)[0], 'phys2cvr')
-    log_path = os.path.join(outdir, 'logs')
-    os.makedirs(log_path, exist_ok=True)
-    isotime = datetime.datetime.now().strftime('%Y-%m-%dT%H%M%S')
-    _, fname, _ = io.check_ext('.nii.gz', os.path.basename(fname), remove=True)
-    f = open(os.path.join(log_path, f'p2c_call_{fname}_{isotime}.sh'), 'a')
-    f.write(f'#!bin/bash \n{call_str}')
-    f.close()
 
 
 def phys2cvr(
@@ -83,7 +55,7 @@ def phys2cvr(
     scale_factor=None,
     lag_map=None,
     regr_dir=None,
-    comp_petco2hrf=True,
+    comp_endtidal=True,
     response_function='hrf',
     quiet=False,
     debug=False,
@@ -219,13 +191,13 @@ def phys2cvr(
         Directory containing pre-generated lagged regressors, useful
         to (re-)run a GLM analysis.
         Default: None
-    comp_petco2hrf : bool, optional
-        Run the convolution of the physiological trace.
-        Can be turned off
-        Default: True
-    response_function : {`hrf`, `rrf`, `crf`}, None, str, path, or 1D array-like, optional
+    comp_endtidal : bool, optional
+        Compute the end-tidal interpolation of the CO2 signal.
+    response_function : {`hrf`, `rrf`, `crf`, `None`}, None, str, path, or 1D array-like, optional
         Name of the response function to be used in the convolution of the regressor of
         interest. Default is `hrf`.
+        If None, skips the convolution step.
+        If file, loads it.
         For `rrf` and `crf`, `phys2denoise` must be installed (see extra installs).
         See `signal.compute_petco2hrf` for details.
     quiet : bool, optional
@@ -313,23 +285,23 @@ def phys2cvr(
     LGR.info(f'Input file is {fname_func}')
 
     # Check if func is 1d, save its extension in any case, and read it
-    func_is_1d, _, fname_ext = io.check_ext(EXT_ARRAY, fname_func, remove=True)
+    func_is_1d, _, fname_ext = utils.check_ext(io.EXT_ARRAY, fname_func, remove=True)
 
     # Check that all input values have right type
-    tr = io.if_declared_force_type(tr, 'float', 'tr')
-    freq = io.if_declared_force_type(freq, 'float', 'freq')
-    trial_len = io.if_declared_force_type(trial_len, 'int', 'trial_len')
-    n_trials = io.if_declared_force_type(n_trials, 'int', 'n_trials')
-    highcut = io.if_declared_force_type(highcut, 'float', 'highcut')
-    lowcut = io.if_declared_force_type(lowcut, 'float', 'lowcut')
-    lag_max = io.if_declared_force_type(lag_max, 'float', 'lag_max')
-    lag_step = io.if_declared_force_type(lag_step, 'float', 'lag_step')
-    l_degree = io.if_declared_force_type(l_degree, 'int', 'l_degree')
+    tr = utils.if_declared_force_type(tr, 'float', 'tr')
+    freq = utils.if_declared_force_type(freq, 'float', 'freq')
+    trial_len = utils.if_declared_force_type(trial_len, 'int', 'trial_len')
+    n_trials = utils.if_declared_force_type(n_trials, 'int', 'n_trials')
+    highcut = utils.if_declared_force_type(highcut, 'float', 'highcut')
+    lowcut = utils.if_declared_force_type(lowcut, 'float', 'lowcut')
+    lag_max = utils.if_declared_force_type(lag_max, 'float', 'lag_max')
+    lag_step = utils.if_declared_force_type(lag_step, 'float', 'lag_step')
+    l_degree = utils.if_declared_force_type(l_degree, 'int', 'l_degree')
     if l_degree < 0:
         raise ValueError(
             'The specified order of the Legendre polynomials must be >= 0.'
         )
-    scale_factor = io.if_declared_force_type(scale_factor, 'float', 'scale_factor')
+    scale_factor = utils.if_declared_force_type(scale_factor, 'float', 'scale_factor')
     if r2model not in stats.R2MODEL:
         raise ValueError(
             f'R^2 model {r2model} not supported. Supported models are {stats.R2MODEL}'
@@ -337,7 +309,7 @@ def phys2cvr(
 
     if func_is_1d:
         if tr:
-            func_avg = np.genfromtxt(fname_func)
+            func_avg = io.load_array(fname_func)
             LGR.info(f'Loading {fname_func}')
             if apply_filter:
                 LGR.info('Applying butterworth filter to {fname_func}')
@@ -350,6 +322,7 @@ def phys2cvr(
                 'Rerun specifying the TR'
             )
     else:
+        _, _, fname_ext = utils.check_ext(io.EXT_NIMG, fname_func, remove=True)
         try:
             func, dmask, img = io.load_nifti_get_mask(fname_func, dim=4)
         except nib.filebasedimages.ImageFileError:
@@ -420,11 +393,12 @@ def phys2cvr(
         # The former is more robust to intrinsic data noise than the latter
         petco2hrf = signal.spc(func_avg)
 
-        # Reassign fname_co2 to fname_func for later use - calling splitext twice cause .gz
-        basename_co2 = os.path.splitext(
-            os.path.splitext(f'avg_{os.path.basename(fname_func)}')[0]
-        )[0]
-        outname = os.path.join(outdir, basename_co2)
+        # Reassign fname_co2 to fname_func for later use
+        _, basename_co2, _ = utils.check_ext(
+            io.EXT_ALL, f'avg_{os.path.basename(fname_func)}', scan=True, remove=True
+        )
+
+        outprefix = os.path.join(outdir, basename_co2)
 
         # If freq was declared, upsample the average GM to that.
         # Otherwise, set freq to inverse of TR.
@@ -436,14 +410,14 @@ def phys2cvr(
             upsamp_tps = int(np.round(petco2hrf.shape[-1] * tr * freq))
             petco2hrf = signal.resample_signal_samples(petco2hrf, upsamp_tps)
     else:
-        co2_is_phys, _ = io.check_ext('.phys', fname_co2)
-        co2_is_1d, _ = io.check_ext(EXT_ARRAY, fname_co2)
+        co2_is_phys, _ = utils.check_ext('.phys', fname_co2)
+        co2_is_1d, _ = utils.check_ext(io.EXT_ARRAY, fname_co2)
 
         if co2_is_1d:
             if fname_pidx:
-                pidx = np.genfromtxt(fname_pidx)
+                pidx = io.load_array(fname_pidx)
                 pidx = pidx.astype(int)
-            elif comp_petco2hrf:
+            elif comp_endtidal:
                 raise NameError(
                     f'{fname_co2} file is a text file, but no '
                     'file containing its peaks was provided. '
@@ -457,49 +431,50 @@ def phys2cvr(
                     ' file!'
                 )
 
-            co2 = np.genfromtxt(fname_co2)
+            co2 = io.load_array(fname_co2)
         elif co2_is_phys:
             # Read a phys file!
-            phys = load_physio(fname_co2, allow_pickle=True)
-
-            co2 = phys.data
-            pidx = phys.peaks
             if freq:
                 LGR.warning(f'Forcing CO2 frequency to be {freq} Hz')
+                co2, pidx, _ = io.load_physio(fname_co2)
             else:
-                freq = phys.fs
+                co2, pidx, freq = io.load_physio(fname_co2)
         else:
             raise NotImplementedError(
                 f'{fname_co2} file type is not supported yet, or '
                 'the extension was not specified.'
             )
 
-        # Set output file & path - calling splitext twice cause .gz
-        basename_co2 = os.path.splitext(
-            os.path.splitext(os.path.basename(fname_co2))[0]
-        )[0]
-        outname = os.path.join(outdir, basename_co2)
+        _, basename_co2, _ = utils.check_ext(
+            io.EXT_ALL, os.path.basename(fname_co2), scan=True, remove=True
+        )[1]
 
-        # Unless user asks to skip this step, convolve the end tidal signal.
-        if comp_petco2hrf is False:
-            LGR.info(
-                'Skipping computation of PetCO2 trace (did you provide a previously '
-                'computed version instead of raw CO2 data?)'
-            )
-            petco2hrf = co2
-        else:
-            petco2hrf = signal.compute_petco2hrf(
-                co2, pidx, freq, outname, response_function
-            )
+        outprefix = os.path.join(outdir, basename_co2)
 
-    # If a regressor directory is not specified, compute the regressors.
+        petco2hrf = signal.compute_petco2hrf(
+            co2, pidx, freq, outprefix, comp_endtidal, response_function
+        )
+
+    # If a regressor dir is specified, try load the data,
+    # If failing or otherwise, compute the regressors.
+    if run_regression and regr_dir is not None:
+        try:
+            regr = io.load_array(
+                os.path.join(regr_dir, '..', f'{outprefix}_petco2hrf.1D')
+            )
+            regr_shifts = io.load_array(os.path.join(regr_dir, 'co2_shifts.1D'))
+        except OSError:
+            LGR.warning(f'Regressor {outprefix}_petco2hrf.1D not found. Estimating it.')
+            # Set regr_dir to None to activate next if statement.
+            regr_dir = None
+
     if regr_dir is None:
         regr, regr_shifts = create_physio_regressor(
             func_avg,
             petco2hrf,
             tr,
             freq,
-            outname,
+            outprefix,
             lag_max,
             trial_len,
             n_trials,
@@ -509,29 +484,6 @@ def phys2cvr(
             abs_xcorr,
             skip_xcorr,
         )
-    elif run_regression:
-        try:
-            regr = np.genfromtxt(
-                os.path.join(regr_dir, '..', f'{outname}_petco2hrf.1D')
-            )
-            regr_shifts = np.genfromtxt(os.path.join(regr_dir, 'co2_shifts.1D'))
-        except OSError:
-            LGR.warning(f'Regressor {outname}_petco2hrf.1D not found. Estimating it.')
-            regr, regr_shifts = create_physio_regressor(
-                func_avg,
-                petco2hrf,
-                tr,
-                freq,
-                outname,
-                lag_max,
-                trial_len,
-                n_trials,
-                '.1D',
-                lagged_regression,
-                legacy,
-                abs_xcorr,
-                skip_xcorr,
-            )
 
     # Run internal regression if required and possible!
     if not func_is_1d and run_regression:
@@ -539,7 +491,7 @@ def phys2cvr(
 
         # Change dimensions in image header before export
         LGR.info('Prepare output image')
-        _, fname_out_func, _ = io.check_ext(
+        _, fname_out_func, _ = utils.check_ext(
             fname_ext, os.path.basename(fname_func), remove=True
         )
         fname_out_func = os.path.join(outdir, fname_out_func)
@@ -557,40 +509,41 @@ def phys2cvr(
 
         # Read in eventual denoising factors
         if denoise_matrix_file:
-            denoise_matrix_file = io.if_declared_force_type(
+            denoise_matrix_file = utils.if_declared_force_type(
                 denoise_matrix_file, 'list', 'denoise_matrix_file'
             )
             for matrix in denoise_matrix_file:
                 LGR.info(f'Read confounding factor from {matrix}')
-                conf = np.genfromtxt(matrix)
+                conf = io.load_array(matrix)
                 denoise_matrix = np.hstack([denoise_matrix, conf])
         # Read in eventual extra factors
         if extra_matrix_file:
-            extra_matrix_file = io.if_declared_force_type(
+            extra_matrix_file = utils.if_declared_force_type(
                 extra_matrix_file, 'list', 'extra_matrix_file'
             )
             matlist = []
             for matrix in extra_matrix_file:
                 LGR.info(f'Read extra factor for orthogonalisation from {matrix}')
-                matlist += [np.genfromtxt(matrix)]
+                matlist += [io.load_array(matrix)]
             extra_matrix = np.hstack(matlist)
         else:
             extra_matrix = None
         # Read in eventual orthogonalisable factors
         if orthogonalised_matrix_file:
-            orthogonalised_matrix_file = io.if_declared_force_type(
+            orthogonalised_matrix_file = utils.if_declared_force_type(
                 orthogonalised_matrix_file, 'list', 'orthogonalised_matrix_file'
             )
             matlist = []
             for matrix in orthogonalised_matrix_file:
                 LGR.info(f'Read confounding factor from {matrix}')
-                matlist += [np.genfromtxt(matrix)]
+                matlist += [io.load_array(matrix)]
             orthogonalised_matrix = np.hstack(matlist)
         else:
             orthogonalised_matrix = None
 
         LGR.info('Compute simple CVR estimation (bulk shift only)')
         x1D = os.path.join(outdir, 'mat', 'mat_simple.1D')
+        regr = utils.check_array_dim('regr', regr, shape='rectangle')
         beta, tstat, r_square = stats.regression(
             func,
             regr,
@@ -686,7 +639,7 @@ def phys2cvr(
                         f'Perform L-GLM for lag {lag_list[i]} ({i + 1} of '
                         f'{len(lag_idx_list)}'
                     )
-                    regr = regr_shifts[(i * step), :]
+                    regr = regr_shifts[(i * step), :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
                     (beta[lag_idx == i], tstat[lag_idx == i], _) = stats.regression(
@@ -721,7 +674,7 @@ def phys2cvr(
 
                 for n, i in enumerate(lag_range):
                     LGR.info(f'Perform L-GLM number {n + 1} of {len(lag_range)}')
-                    regr = regr_shifts[i, :]
+                    regr = regr_shifts[i, :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
                     (
@@ -798,7 +751,7 @@ def _main(argv=None):
 
     options = _check_opt_conf(options)
 
-    save_bash_call(options.fname_func, options.outdir)
+    utils.save_bash_call(options.fname_func, options.outdir)
 
     phys2cvr(**vars(options))
 

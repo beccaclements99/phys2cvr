@@ -1,29 +1,23 @@
 #!/usr/bin/env python3
 """
-Statistical module for phys2cvr.
+Module that creates the regressors used in phys2cvr.
 
 Attributes
 ----------
 LGR
     Logger
-R2MODEL : list
-    List of supported R^2 models
 """
 
 import logging
 import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view as swv
-from scipy.stats import zscore
 
-from phys2cvr import io
-from phys2cvr.io import FIGSIZE, SET_DPI, export_regressor
+from phys2cvr.io import export_regressor
 from phys2cvr.signal import resample_signal_freqs
 from phys2cvr.stats import x_corr
-
-R2MODEL = ['full', 'partial', 'intercept', 'adj_full', 'adj_partial', 'adj_intercept']
+from phys2cvr.viz import plot_two_timeseries, plot_xcorr
 
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
@@ -50,15 +44,12 @@ def create_legendre(degree, length):
         """Use Bonnet method to create Leg polys."""
         if d == 0:
             return np.ones_like(x)
-        elif d == 1:
+        if d == 1:
             return x
-        else:
-            return (
-                (2 * d - 1) * x * _bonnet(d - 1, x) - (d - 1) * _bonnet(d - 2, x)
-            ) / d
+        return ((2 * d - 1) * x * _bonnet(d - 1, x) - (d - 1) * _bonnet(d - 2, x)) / d
 
     x = np.linspace(-1, 1, length)
-    legendre = np.empty([length, degree + 1], dtype='float32')
+    legendre = np.empty((length, degree + 1), dtype='float32')
     for n in range(degree + 1):
         legendre[:, n] = _bonnet(n, x)
     return legendre
@@ -68,7 +59,7 @@ def compute_bulk_shift(
     func_upsampled,
     petco2hrf,
     freq,
-    outname,
+    outprefix,
     trial_len=None,
     n_trials=None,
     abs_xcorr=False,
@@ -84,7 +75,7 @@ def compute_bulk_shift(
         Regressor of interest
     freq : str, int, or float
         Sample frequency of petco2hrf
-    outname : list or path
+    outprefix : list or path
         Path to output directory for regressors.
     trial_len : str or int, optional
         Length of each single trial for tasks that have more than one
@@ -117,7 +108,6 @@ def compute_bulk_shift(
         if n_trials > 4:
             LGR.info('Ignoring last trial to improve bulk shift estimation')
             n_shifts = first_tp * (n_trials - 2)
-
     elif trial_len and not n_trials:
         LGR.warning(
             'The length of trial was specified, but the number of '
@@ -136,25 +126,14 @@ def compute_bulk_shift(
     _, optshift, xcorr = x_corr(
         func_cut, petco2hrf, n_shifts=n_shifts, offset=first_tp, abs_xcorr=abs_xcorr
     )
-    LGR.info(
-        f'Cross correlation has estimated a bulk shift of {optshift / freq} seconds'
-    )
+
+    LGR.info(f'Cross correlation estimated a bulk shift of {optshift / freq} seconds')
     # Export estimated optimal shift in seconds
-    with open(f'{outname}_optshift.1D', 'w') as f:
+    with open(f'{outprefix}_optshift.1D', 'w') as f:
         print(f'{(optshift / freq):.4f}', file=f)
 
-    # Preparing time axis for plots
-    time_axis = np.linspace(0, (len(xcorr) - 1) / freq, len(xcorr))
-
     # Export xcorr figure
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.plot(time_axis, xcorr)
-    plt.plot(time_axis[optshift], xcorr[optshift], 'x')
-    plt.legend(['Cross correlation value', 'Optimal detected shift'])
-    plt.title('Cross correlation and optimal shift')
-    plt.tight_layout()
-    plt.savefig(f'{outname}_optshift.png', dpi=SET_DPI)
-    plt.close()
+    plot_xcorr(xcorr, outprefix, freq)
 
     # This shouldn't happen, but still check
     if optshift + func_upsampled.shape[0] > len(petco2hrf):
@@ -173,7 +152,7 @@ def create_fine_shift_regressors(
     freq,
     func_size,
     func_upsamp_size,
-    outname,
+    outprefix,
     ext='.1D',
     legacy=False,
 ):
@@ -195,7 +174,7 @@ def create_fine_shift_regressors(
         Total timepoints of functional timeseries
     func_upsamp_size : int
         Total timepoints of functional timeseries, resampled at `freq` frequency
-    outname : list or path
+    outprefix : list or path
         Path to output directory for regressors.
     ext : str, optional
         Extension to be used for the exported regressors.
@@ -208,14 +187,13 @@ def create_fine_shift_regressors(
     petco2hrf_lagged : np.ndarray
         The shifted versions of the regresosr of interest.
     """
-    outprefix = os.path.join(
-        os.path.split(outname)[0], 'regr', os.path.split(outname)[1]
-    )
-    os.makedirs(os.path.join(os.path.split(outname)[0], 'regr'), exist_ok=True)
+    outdir, base = os.path.split(outprefix)
+    regr_dir = os.path.join(outdir, 'regr')
+    os.makedirs(regr_dir, exist_ok=True)
+    outprefix = os.path.join(regr_dir, base)
 
-    # Set num of fine shifts
     neg_shifts = int(lag_max * freq)
-    pos_shifts = neg_shifts if legacy is True else (neg_shifts + 1)
+    pos_shifts = neg_shifts if legacy else neg_shifts + 1
 
     # Padding regressor right for shifts if not enough timepoints
     # Padding regressor left for shifts and update optshift if less than neg_shifts.
@@ -233,7 +211,6 @@ def create_fine_shift_regressors(
     petco2hrf_lagged = export_regressor(
         petco2hrf_lagged, func_size, outprefix, 'shifts', ext
     )
-
     return petco2hrf_lagged
 
 
@@ -242,7 +219,7 @@ def create_physio_regressor(
     petco2hrf,
     tr,
     freq,
-    outname,
+    outprefix,
     lag_max=None,
     trial_len=None,
     n_trials=None,
@@ -265,7 +242,7 @@ def create_physio_regressor(
         Repetition time (TR) of timeseries
     freq : str, int, or float
         Sample frequency of petco2hrf
-    outname : list or path
+    outprefix : list or path
         Path to output directory for computed regressors.
     lag_max : int or float, optional
         Limits (both positive and negative) for the estimated temporal lag,
@@ -304,32 +281,33 @@ def create_physio_regressor(
     # Upsample functional signal
     func_upsampled = resample_signal_freqs(func_avg, 1 / tr, freq)
 
-    if not skip_xcorr:
-        optshift = compute_bulk_shift(
-            func_upsampled, petco2hrf, freq, outname, trial_len, n_trials, abs_xcorr
-        )
-    else:
+    if skip_xcorr:
         LGR.info('Skipping Bulk Shift Computation')
         optshift = 0
+    else:
+        optshift = compute_bulk_shift(
+            func_upsampled, petco2hrf, freq, outprefix, trial_len, n_trials, abs_xcorr
+        )
 
     petco2hrf_shift = petco2hrf[optshift : optshift + func_upsampled.shape[0]]
 
-    # Exporting figures of shift
-    plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
-    plt.plot(zscore(petco2hrf_shift), '-', zscore(func_upsampled), '-')
-    plt.title('Optimally shifted regressor and average ROI signal')
-    plt.legend(['Optimally shifted regressor', 'Average ROI signal'])
-    plt.tight_layout()
-    plt.savefig(f'{outname}_petco2hrf_vs_avgroi.png', dpi=SET_DPI)
-    plt.close()
+    # Plot (shifted) regressor vs average ROI signal.
+    plot_two_timeseries(
+        petco2hrf_shift,
+        func_upsampled,
+        f'{outprefix}_petco2hrf_vs_avgroi.png',
+        'Optimally shifted regressor',
+        'Average ROI signal',
+        freq,
+        zscore=True,
+    )
 
-    petco2hrf_demean = io.export_regressor(
-        petco2hrf_shift, func_avg.shape[-1], outname, 'petco2hrf_simple', ext
+    petco2hrf_demean = export_regressor(
+        petco2hrf_shift, func_avg.shape[-1], outprefix, 'petco2hrf_simple', ext
     )
 
     # Initialise the shifts first.
     petco2hrf_lagged = None
-
     if lagged_regression and lag_max:
         petco2hrf_lagged = create_fine_shift_regressors(
             petco2hrf,
@@ -338,18 +316,16 @@ def create_physio_regressor(
             freq,
             func_avg.shape[-1],
             func_upsampled.shape[-1],
-            outname,
+            outprefix,
             ext,
             legacy,
         )
-    elif lagged_regression and lag_max is None:
+    elif lagged_regression and not lag_max:
         LGR.warning(
-            'The generation of lagged regressors was requested, '
-            'but the maximum lag was not specified. Skipping '
-            'the generation of lagged regressors.'
+            'Lagged regressors requested but maximum lag not provided. Skipping.'
         )
     else:
-        LGR.info('Skipping the generation of lagged regressors.')
+        LGR.info('Skipping generation of lagged regressors.')
 
     return petco2hrf_demean, petco2hrf_lagged
 
