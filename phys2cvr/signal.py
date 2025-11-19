@@ -17,8 +17,6 @@ import scipy.interpolate as spint
 import scipy.stats as sct
 from scipy.signal import butter, filtfilt
 
-from phys2cvr.viz import plot_two_timeseries
-
 LGR = logging.getLogger(__name__)
 LGR.setLevel(logging.INFO)
 
