@@ -57,39 +57,5 @@ p2c.__version__
 ```
 
 ## Developer installation
-To be sure you have everything installed to develop (and test) `phys2cvr``, fork smoia/phys2cvr to your repository, then clone it locally and move inside the cloned folder. Finally, run the following commands from within the repository main folder:
-```shell
-# Add upstream remote
-$ git remote add upstream git@github.com:smoia/phys2cvr.git
 
-# Fetch everything, tags included
-$ git fetch --all --tags
-
-# Checkout master (the main development branch) and make it track upstream
-$ git checkout master
-$ git branch --set-upstream-to=upstream/master
-
-# !!! VERY IMPORTANT !!!
-# Set the default push to origin, in order NOT to push by mistake to upstream.
-$ git config remote.pushDefault origin
-
-# Install package with pip using the developer mode and the `[dev]` label
-# You might need to use pip3 depending on how you set up your system
-$ pip install -e .[dev]
-
-# Install pre-commit
-$ pre-commit install
-$ pre-commit run --all-files
-```
-
-The output should look something like (may contain more checks and "Skipped" messages):
-
-```
-trim trailing whitespace.................................................Passed
-fix end of files.........................................................Passed
-check yaml...............................................................Passed
-check for added large files..............................................Passed
-check for case conflicts.................................................Passed
-check for merge conflicts................................................Passed
-ruff linter..............................................................Passed
-```
+Follow the developer installation [pt. 1](../developers/how_to_contribute.html#linux-mac-and-windows-developer-installation) and [pt. 2](developers/how_to_contribute.html#full-developer-installation) in this documentation, [including installing pre-commit](../developers/how_to_contribute.html#install-pre-commit-hooks)

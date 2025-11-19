@@ -2,7 +2,9 @@
 
 import argparse
 
-from phys2cvr import __version__
+from phys2cvr import _version
+
+__version__ = _version.get_versions()['version']
 
 
 def _get_parser():

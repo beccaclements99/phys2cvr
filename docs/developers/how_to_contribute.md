@@ -30,14 +30,14 @@ Follow these steps to get started:
 
 ## Linux, Mac, and Windows developer installation
 
-Be sure to have `git` and `pip` installed. Fork the `phys2cvr` repository
-in GitHub, then open a terminal and run the following code to clone the
-forked repository and set it as your *origin*:
+Be sure to have `git` and `pip` installed locally. If you have not setup SSH authentication protocols with GitHub, do so by following [this guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
+
+Fork the `phys2cvr` repository in GitHub, then open a terminal and run the following code to clone the forked repository and set it as your *origin*:
 
 ```shell
-$ git clone https://github.com/{username}/phys2cvr.git
-# or in case you prefer to use ssh:
 $ git clone git@github.com:{username}/phys2cvr.git
+# or in case you prefer to use html (why?):
+$ git clone https://github.com/{username}/phys2cvr.git
 ```
 
 We also recommend to set up the [`smoia/phys2cvr`](https://github.com/smoia/phys2cvr) repository as
@@ -57,11 +57,26 @@ to be sure that you have everything you need to work on `phys2cvr`, you
 can install it with all the other packages that are frequently
 used during development in one step!
 
-Go to the `phys2cvr` repository folder and execute the command:
+Go to the `phys2cvr` repository folder and execute the following commands:
 
 ```shell
 $ cd phys2cvr
-$ pip3 install -e .[dev]
+
+# Fetch everything, tags included
+$ git fetch --all --tags
+
+# Checkout master (the main development branch) and make it track upstream
+# In this way, your master will always be up to date with upstream.
+$ git checkout master
+$ git branch --set-upstream-to=upstream/master
+
+# !!! VERY IMPORTANT !!!
+# Set the default push to origin, in order NOT to push by mistake to upstream.
+$ git config remote.pushDefault origin
+
+# Install package with pip using the developer mode and the `[dev]` label
+# You might need to use pip3 depending on how you set up your system
+$ pip install -e .[dev]
 ```
 
 This will install:
@@ -70,9 +85,7 @@ This will install:
  modify the program and run it without having to reinstall it every
  time!
 - All `phys2cvr` required dependencies.
-- All `phys2cvr` optional dependencies:
-    + All packages used for **filetypes I/O** (`pymatreader`, `scipy`, `nibabel`)
-    + All packages used for **visualisation and plotting** (`matplotlib`, `nilearn`)
+- All `phys2cvr` optional dependencies.
 - All **documentation** modules (`mkdocs` based), so that you can
  build the docs locally before submitting them.
 - All **test** modules (`pytest`, `coverage`), in order for you to test your
@@ -96,7 +109,7 @@ To check that pre-commits are correctly installed, run:
 $ pre-commit run --all-files
 ```
 
-The output should look like:
+The output should look something like (may contain more checks and "Skipped" messages):
 
 ```
 trim trailing whitespace.................................................Passed
@@ -105,7 +118,7 @@ check yaml...............................................................Passed
 check for added large files..............................................Passed
 check for case conflicts.................................................Passed
 check for merge conflicts................................................Passed
-black....................................................................Passed
+ruff linter..............................................................Passed
 ```
 
 ## Check your installation!

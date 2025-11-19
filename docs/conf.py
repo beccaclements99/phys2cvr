@@ -206,7 +206,7 @@ numpydoc_validation_exclude = {  # regex to ignore during docstring check
 sphinx_gallery_conf = {
     "backreferences_dir": "generated/backreferences",
     "doc_module": (f"{package}",),
-    "examples_dirs": ["../tutorials"],
+    "examples_dirs": ["tutorials"],
     "exclude_implicit_doc": {},  # set
     "filename_pattern": r"\d{2}_",
     "gallery_dirs": ["generated/tutorials"],
