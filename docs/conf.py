@@ -114,8 +114,8 @@ html_css_files = [
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "light_logo": "logos/logo2.png",
-    "dark_logo": "logos/logo2.png",
+    "light_logo": "../logos/logo2.png",
+    "dark_logo": "../logos/logo2_alt.png",
     "footer_icons": [
         {
             "name": "GitHub",

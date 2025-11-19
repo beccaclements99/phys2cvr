@@ -156,3 +156,9 @@ working to fix it (see
 [here](https://docs.pytest.org/en/latest/skipping.html#xfail-mark-test-functions-as-expected-to-fail)).
 However, if you do encounter any other error, check that you are connected to internet, you have all the extra dependencies installed, and their version meets `phys2cvr`
 requirements.
+
+## Recognise contributions and co-contributions
+
+If you are working on a commit with other people, [don't forget to acknowledge them](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors).
+
+If you are committing for the first time, or you are contributing a new type of contribution for the first time, declare it in the PR, and add your information to the `.zenodo.json` file in the repo.
