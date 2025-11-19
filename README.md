@@ -5,16 +5,16 @@ phys2cvr
 ========
 
 [![Latest version](https://img.shields.io/pypi/v/phys2cvr?style=flat&logo=pypi)](https://pypi.org/project/phys2cvr/)
-[![Release date](https://img.shields.io/github/release-date/MIPLabCH/nigsp?style=flat&logo=github)](https://github.com/MIPLabCH/nigsp/releases)
+[![Release date](https://img.shields.io/github/release-date/smoia/phys2cvr?style=flat&logo=github)](https://github.com/smoia/phys2cvr/releases)
 [![Auto Release](https://img.shields.io/badge/release-auto.svg?style=flat&colorA=888888&colorB=9B065A&label=auto&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACzElEQVR4AYXBW2iVBQAA4O+/nLlLO9NM7JSXasko2ASZMaKyhRKEDH2ohxHVWy6EiIiiLOgiZG9CtdgG0VNQoJEXRogVgZYylI1skiKVITPTTtnv3M7+v8UvnG3M+r7APLIRxStn69qzqeBBrMYyBDiL4SD0VeFmRwtrkrI5IjP0F7rjzrSjvbTqwubiLZffySrhRrSghBJa8EBYY0NyLJt8bDBOtzbEY72TldQ1kRm6otana8JK3/kzN/3V/NBPU6HsNnNlZAz/ukOalb0RBJKeQnykd7LiX5Fp/YXuQlfUuhXbg8Di5GL9jbXFq/tLa86PpxPhAPrwCYaiorS8L/uuPJh1hZFbcR8mewrx0d7JShr3F7pNW4vX0GRakKWVk7taDq7uPvFWw8YkMcPVb+vfvfRZ1i7zqFwjtmFouL72y6C/0L0Ie3GvaQXRyYVB3YZNE32/+A/D9bVLcRB3yw3hkRCdaDUtFl6Ykr20aaLvKoqIXUdbMj6GFzAmdxfWx9iIRrkDr1f27cFONGMUo/gRI/jNbIMYxJOoR1cY0OGaVPb5z9mlKbyJP/EsdmIXvsFmM7Ql42nEblX3xI1BbYbTkXCqRnxUbgzPo4T7sQBNeBG7zbAiDI8nWfZDhQWYCG4PFr+HMBQ6l5VPJybeRyJXwsdYJ/cRnlJV0yB4ZlUYtFQIkMZnst8fRrPcKezHCblz2IInMIkPzbbyb9mW42nWInc2xmE0y61AJ06oGsXL5rcOK1UdCbEXiVwNXsEy/6+EbaiVG8eeEAfxvaoSBnCH61uOD7BS1Ul8ESHBKWxCrdyd6EYNKihgEVrwOAbQruoytuBYIFfAc3gVN6iawhjKyNCEpYhVJXgbOzARyaU4hCtYizq5EI1YgiUoIlT1B7ZjByqmRWYbwtdYjoWoN7+LOIQefIqKawLzK6ID69GGpQgwhhEcwGGUzfEPAiPqsCXadFsAAAAASUVORK5CYII=)](https://github.com/intuit/auto)
 
-<!-- [![See the documentation at: https://nigsp.readthedocs.io](https://img.shields.io/badge/docs-read%20latest-informational?style=flat&logo=readthedocs)](https://nigsp.readthedocs.io/en/latest/?badge=latest) -->
+<!-- [![See the documentation at: https://phys2cvr.readthedocs.io](https://img.shields.io/badge/docs-read%20latest-informational?style=flat&logo=readthedocs)](https://phys2cvr.readthedocs.io/en/latest/?badge=latest) -->
 [![Latest DOI](https://zenodo.org/badge/357980417.svg)](https://doi.org/10.5281/zenodo.5559756)
 [![Licensed Apache 2.0](https://img.shields.io/github/license/smoia/phys2cvr?style=flat)](https://github.com/smoia/phys2cvr/blob/master/LICENSE)
 
-<!-- [![Codecov](https://img.shields.io/codecov/c/gh/MIPlabCH/nigsp?style=flat&label=codecov&logo=codecov)](https://codecov.io/gh/MIPLabCH/nigsp)
-[![Build Status](https://img.shields.io/circleci/build/github/MIPLabCH/nigsp?style=flat&label=circleci&logo=circleci)](https://circleci.com/gh/MIPLabCH/nigsp)
-[![Documentation Status](https://img.shields.io/readthedocs/nigsp?style=flat&label=readthedocs&logo=readthedocs)](https://nigsp.readthedocs.io/en/latest/?badge=latest) -->
+<!-- [![Codecov](https://img.shields.io/codecov/c/gh/smoia/phys2cvr?style=flat&label=codecov&logo=codecov)](https://codecov.io/gh/smoia/phys2cvr)
+[![Build Status](https://img.shields.io/circleci/build/github/smoia/phys2cvr?style=flat&label=circleci&logo=circleci)](https://circleci.com/gh/smoia/phys2cvr) -->
+[![Documentation Status](https://img.shields.io/readthedocs/phys2cvr?style=flat&label=readthedocs&logo=readthedocs)](https://phys2cvr.readthedocs.io/en/latest/?badge=latest)
 
 [![Latest version](https://img.shields.io/pypi/v/phys2cvr?style=flat&logo=pypi&logoColor=white)](https://pypi.org/project/phys2cvr/)
 [![Supports python version](https://img.shields.io/pypi/pyversions/phys2cvr?style=shield&logo=python)](https://pypi.org/project/phys2cvr/)
@@ -33,7 +33,7 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 Documentation
 =============
 
-Full documentation coming soon!
+Full documentation [here](https://phys2cvr.readthedocs.io/en/latest/)
 
 Cite
 ----
@@ -56,70 +56,16 @@ If you are using the `--baltimore` configuration option, please cite only the Ze
 Installation
 ------------
 
-Install on any `*nix` system using python and pip, or clone this repository and install locally (run setup.py or pip).
-`phys2cvr` supports python versions 3.6+. However, please note that no tests are currently run.
-
-### Install with `pip` (recommended)
-
-:exclamation::exclamation::exclamation: Please note that some systems might require to use `pip3` instead of `pip`.
-
-#### Basic installation:
-For basic installation, simply run:
-```bash
-pip install phys2cvr
-```
-
-#### Extras installation:
-If you want to use extra features (currently just loading matlab files), run instead:
-```bash
-pip install phys2cvr[matlab]
-```
-
-### Clone from Github / install without `pip`
-
-:exclamation::exclamation::exclamation: Please note that `phys2cvr` is continuously deployed, i.e. the latest feature available are immediately released on PyPI.
-To install `phys2cvr` from Github, clone the repository first, then move to the cloned folder and run:
-```bash
-python setup.py install
-```
-
-Alternatively, `pip` can be used too:
-```bash
-pip install .
-```
+Instructions [here](https://phys2cvr.readthedocs.io/en/latest/usage/installation.html#installation)
 
 ### Developer installation
 
-To be sure you have everything installed to develop (and test) `phys2cvr`, **fork** `smoia/phys2cvr` to your repository, then clone it locally and move inside the cloned folder. Finally, run the following commands from within the repository main folder:
-```bash
-# Add upstream remote
-git remote add upstream git@github.com:smoia/phys2cvr.git
-
-# Fetch everything, tags included
-git fetch --all --tags
-
-# Checkout master (the main development branch) and make it track upstream
-git checkout master
-git branch --set-upstream-to=upstream/master
-
-# !!! VERY IMPORTANT !!!
-# Set the default push to origin, in order NOT to push by mistake to upstream.
-git config remote.pushDefault origin
-
-# Install package with pip using the developer mode and the `[dev]` label
-# You might need to use pip3 depending on how you set up your system
-pip install -e .[dev]
-
-# Initialise and run once pre-commit
-pre-commit install
-pre-commit run --all
-```
-If you make changes that you consider fundamental/interesting for the whole community, feel free to open a PR!
+(Potential) Contributors, instead see [here](https://phys2cvr.readthedocs.io/en/latest/developers/how_to_contribute.html#linux-mac-and-windows-developer-installation)!
 
 Run/use `phys2cvr`
 ---------------
 
-You can run the `phys2cvr` workflow in a shell session (or in your code) - just follow the help:
+You can run the `phys2cvr` workflow in a shell session (or in your code) - just follow the help or see [here](https://phys2cvr.readthedocs.io/en/latest/usage/cli.html):
 ```shell
 phys2cvr --help
 ```
@@ -131,7 +77,7 @@ import phys2cvr as p2c
 p2c.__version__
 ```
 
-Full API coming soon.
+Full API [here](https://phys2cvr.readthedocs.io/en/latest/api.html)
 
 
 ## Contributors ✨
@@ -162,7 +108,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 License
 -------
 
-Copyright 2021-2025, Stefano Moia.
+Copyright 2021-2025, Stefano Moia & phys2cvr contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

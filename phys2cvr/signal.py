@@ -325,7 +325,7 @@ def resample_signal_freqs(ts, freq1, freq2, axis=-1):
 
 
 """
-Copyright 2021, Stefano Moia.
+Copyright 2021-2025, Stefano Moia & phys2cvr contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
