@@ -10,16 +10,16 @@ EXT_MAT : list
     List of supported matlab file extensions, in lower case.
 EXT_ARRAY : list
     List of supported 1D and 2D array-like file extensions, in lower case.
+EXT_PHYS : list
+    List of supported physiopy file extensions, in lower case.
 EXT_NIFTI : list
     List of supported nifti file extensions, in lower case.
 EXT_GIFTI : list
     List of supported gifti file extensions, in lower case.
+EXT_NIMG : list
+    List of supported neuroimaging file extensions, in lower case.
 EXT_ALL : list
     List of ALL supported file extensions, in lower case.
-FIGSIZE : tuple
-    Figure size
-SET_DPI : int
-    DPI of the figure
 LGR :
     Logger
 """
@@ -32,13 +32,11 @@ from peakdet.io import load_physio as load_pk_physio
 
 from phys2cvr import signal, utils
 
-SET_DPI = 100
-FIGSIZE = (18, 10)
 EXT_1D = ['.txt', '.csv', '.tsv', '.1d', '.par', '.tsv.gz']
-EXT_PHYS = ['.phys']
 EXT_MAT = ['.mat']
 # EXT_XLS = [".xls"]
 EXT_ARRAY = EXT_1D + EXT_MAT  # + EXT_XLS
+EXT_PHYS = ['.phys']
 EXT_NIFTI = ['.nii', '.nii.gz']
 EXT_GIFTI = ['.gii', '.gii.gz']
 EXT_NIMG = EXT_NIFTI + EXT_GIFTI

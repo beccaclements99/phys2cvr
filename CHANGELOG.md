@@ -3,6 +3,7 @@
 :tada: This release contains work from a new contributor! :tada:
 
 Thank you, razkin ([@RazkinMalen](https://github.com/RazkinMalen)), for all your work!
+Thank you, Merel ([@merelvdthiel](https://github.com/merelvdthiel)), for all your work!
 
 #### 💥 Breaking Change during development
 

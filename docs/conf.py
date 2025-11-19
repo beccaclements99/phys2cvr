@@ -13,6 +13,7 @@
 import os
 import sys
 
+from intersphinx_registry import get_intersphinx_mapping
 from sphinx_gallery.sorting import FileNameSortKey
 
 import phys2cvr
@@ -23,7 +24,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "phys2cvr"
-copyright = "2022, Stefano Moia, EPFL"
+copyright = "2021-2025, Stefano Moia & the phys2cvr contributors"
 author = "Stefano Moia"
 
 # Import project to get version info
@@ -89,6 +90,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 nitpicky = True
 nitpick_ignore = []
 
+# list of warning types to suppress
+suppress_warnings = ["config.cache"]
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -110,7 +114,8 @@ html_css_files = [
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "light_logo": "logos/physiopy_logo.svg",
+    "light_logo": "logos/logo2.png",
+    "dark_logo": "logos/logo2.png",
     "footer_icons": [
         {
             "name": "GitHub",
@@ -134,11 +139,9 @@ html_theme_options = {
 htmlhelp_basename = "phys2cvr"
 
 # -- intersphinx -------------------------------------------------------------
-intersphinx_mapping = {
-    "nibabel": ("https://nipy.org/nibabel/", None),
-    "numpy": ("https://numpy.org/doc/stable", None),
-    "python": ("https://docs.python.org/3", None),
-}
+intersphinx_mapping = get_intersphinx_mapping(
+    packages={"matplotlib", "nibabel", "numpy", "python", "scipy"}
+)
 intersphinx_timeout = 5
 
 # -- sphinx-issues -----------------------------------------------------------

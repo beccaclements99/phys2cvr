@@ -37,6 +37,26 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "merelvdthiel",
+      "name": "merelvdthiel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72999546?v=4",
+      "profile": "https://github.com/merelvdthiel",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "RazkinMalen",
+      "name": "razkin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/147508933?v=4",
+      "profile": "https://github.com/RazkinMalen",
+      "contributions": [
+        "design",
+        "doc",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 5,
@@ -44,5 +64,6 @@
   "projectOwner": "smoia",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
