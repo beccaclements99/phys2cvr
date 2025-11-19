@@ -1,3 +1,20 @@
+# 0.28.1 (Wed Nov 19 2025)
+
+#### ⚠️ Pushed to `master`
+
+- Refactor compute_petco2hrf to improve modularity and hopefully fix recursive import. ([@smoia](https://github.com/smoia))
+- docs: Fix import ([@smoia](https://github.com/smoia))
+
+#### 📝 Documentation
+
+- Try to fix documentation [#147](https://github.com/smoia/phys2cvr/pull/147) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.28.0 (Wed Nov 19 2025)
 
 :tada: This release contains work from a new contributor! :tada:
