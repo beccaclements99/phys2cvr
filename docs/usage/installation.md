@@ -8,11 +8,23 @@ Install on any `*nix` system using python and pip, or clone this repository and 
 
 :exclamation::exclamation::exclamation: Please note that some systems might require to use `pip3` instead of `pip`.
 
-### Basic installation:
+## Basic installation:
 For basic installation, simply run:
 ```shell
 $ pip install phys2cvr
 ```
+
+### Richer installation
+To install the dependencies to enable more features, you can append labels to `phys2cvr`, e.g:
+```shell
+$ pip install phys2cvr[all]
+```
+
+The possible features are:
+
+-  `[responses]`: to use physiological response functions from physiopy's `phys2denoise`.
+-  `[matlab]`: to load and export MATLAB (`.mat`) files.
+-  `[all]`: to install all of the above.
 
 ## Clone from Github / install without `pip`
 
@@ -22,9 +34,26 @@ To install `phys2cvr` from Github, clone the repository first, then move to the 
 $ python setup.py install
 ```
 
+Note that in this case, requirements for extra features need to be installed manually.
+
 Alternatively, `pip` can be used too:
 ```shell
 $ pip install .
+```
+
+## Run/use `phys2cvr`
+
+You can run the `phys2cvr` workflow in a shell session (or in your code) - just follow the help:
+```shell
+$ phys2cvr --help
+```
+
+Alternatively, you can use `phys2cvr` as a module in a python session (or within your python script):
+
+```python
+import phys2cvr as p2c
+
+p2c.__version__
 ```
 
 ## Developer installation
@@ -47,21 +76,20 @@ $ git config remote.pushDefault origin
 # Install package with pip using the developer mode and the `[dev]` label
 # You might need to use pip3 depending on how you set up your system
 $ pip install -e .[dev]
+
+# Install pre-commit
+$ pre-commit install
+$ pre-commit run --all-files
 ```
 
+The output should look something like (may contain more checks and "Skipped" messages):
 
-
-## Run/use `phys2cvr`
-
-You can run the `phys2cvr` workflow in a shell session (or in your code) - just follow the help:
-```shell
-$ phys2cvr --help
 ```
-
-Alternatively, you can use `phys2cvr` as a module in a python session (or within your python script):
-
-```python
-import phys2cvr as p2c
-
-p2c.__version__
+trim trailing whitespace.................................................Passed
+fix end of files.........................................................Passed
+check yaml...............................................................Passed
+check for added large files..............................................Passed
+check for case conflicts.................................................Passed
+check for merge conflicts................................................Passed
+ruff linter..............................................................Passed
 ```
