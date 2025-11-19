@@ -101,8 +101,8 @@ def plot_xcorr(xcorr, outprefix, freq=None):
 
     plt.figure(figsize=FIGSIZE, dpi=SET_DPI)
     plt.plot(time_axis, xcorr)
-    plt.plot(time_axis[xcorr.max()], xcorr[xcorr.max()], 'd')
-    plt.plot(time_axis[np.abs(xcorr).max()], xcorr[np.abs(xcorr).max()], 'x')
+    plt.plot(time_axis[xcorr.argmax()], xcorr[xcorr.argmax()], 'd')
+    plt.plot(time_axis[np.abs(xcorr).argmax()], xcorr[np.abs(xcorr).argmax()], 'x')
     plt.legend(['Cross correlation value', 'Max Xcorr', 'Max absolute Xcorr'])
     plt.title('Cross correlation and optimal shift')
     plt.tight_layout()
