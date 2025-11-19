@@ -1,3 +1,26 @@
+# 0.28.0 (Wed Nov 19 2025)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, razkin ([@RazkinMalen](https://github.com/RazkinMalen)), for all your work!
+
+#### 💥 Breaking Change during development
+
+- Rename internal API (requires re-installation), allow end-tidal interpolation or convolution to be carried out independently, split utility and plotting function in their own modules, small functional refactors, fix extension function [#146](https://github.com/smoia/phys2cvr/pull/146) ([@smoia](https://github.com/smoia))
+
+#### 📝 Documentation
+
+- Documentation and logos for phys2cvr [#145](https://github.com/smoia/phys2cvr/pull/145) ([@RazkinMalen](https://github.com/RazkinMalen) [@merelvdthiel](https://github.com/merelvdthiel) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]) [@smoia](https://github.com/smoia))
+
+#### Authors: 4
+
+- [@merelvdthiel](https://github.com/merelvdthiel)
+- [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot])
+- razkin ([@RazkinMalen](https://github.com/RazkinMalen))
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.27.0 (Tue Nov 11 2025)
 
 #### 💥 Breaking Change during development
