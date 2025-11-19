@@ -638,7 +638,7 @@ def phys2cvr(
                         f'Perform L-GLM for lag {lag_list[i]} ({i + 1} of '
                         f'{len(lag_idx_list)}'
                     )
-                    regr = regr_shifts[(i * step), :]
+                    regr = regr_shifts[(i * step), :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
                     (beta[lag_idx == i], tstat[lag_idx == i], _) = stats.regression(
@@ -673,7 +673,7 @@ def phys2cvr(
 
                 for n, i in enumerate(lag_range):
                     LGR.info(f'Perform L-GLM number {n + 1} of {len(lag_range)}')
-                    regr = regr_shifts[i, :]
+                    regr = regr_shifts[i, :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
                     (

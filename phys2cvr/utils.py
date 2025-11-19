@@ -98,9 +98,12 @@ def check_ext(all_ext, fname, scan=False, remove=False):
     ext = ''.join(Path(fname).suffixes)
     LGR.debug(f'{fname} ends with extension {ext}')
 
-    has_ext = True if ext in all_ext else False
+    has_ext = ext.lower() in all_ext
 
     if not has_ext and scan:
+        all_ext = (
+            all_ext + [e.upper() for e in all_ext] + [e.capitalize() for e in all_ext]
+        )
         for ext in all_ext:
             if exists(f'{fname}{ext}'):
                 fname = f'{fname}{ext}'
@@ -108,13 +111,15 @@ def check_ext(all_ext, fname, scan=False, remove=False):
                 has_ext = True
                 break
 
+    ext = '' if not has_ext else ext
+
     obj_return = [has_ext]
 
     if remove:
         obj_return += [
             fname[: -len(ext)],
             None if ext == '' else ext,
-        ]  # case insensitive solution
+        ]
     else:
         obj_return += [fname]
 
