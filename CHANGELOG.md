@@ -1,3 +1,15 @@
+# 0.28.2 (Wed Nov 19 2025)
+
+#### 🐛 Bug Fix
+
+- fix: Fix circular imports ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.28.1 (Wed Nov 19 2025)
 
 #### ⚠️ Pushed to `master`
