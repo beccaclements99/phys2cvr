@@ -6,10 +6,10 @@
 phys2cvr package
 =============
 
-:mod:`phys2cvr.workflow` - Primary workflows
------------------------------------------
+:mod:`phys2cvr.workflows` - Primary workflows
+------------------------------------------
 
-.. currentmodule:: phys2cvr.workflow
+.. currentmodule:: phys2cvr.workflows
 
 .. autosummary::
    :template: function.rst
