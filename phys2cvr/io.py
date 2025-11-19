@@ -41,7 +41,8 @@ EXT_MAT = ['.mat']
 EXT_ARRAY = EXT_1D + EXT_MAT  # + EXT_XLS
 EXT_NIFTI = ['.nii', '.nii.gz']
 EXT_GIFTI = ['.gii', '.gii.gz']
-EXT_ALL = EXT_ARRAY + EXT_PHYS + EXT_NIFTI + EXT_GIFTI
+EXT_NIMG = EXT_NIFTI + EXT_GIFTI
+EXT_ALL = EXT_ARRAY + EXT_PHYS + EXT_NIMG
 
 
 LGR = logging.getLogger(__name__)

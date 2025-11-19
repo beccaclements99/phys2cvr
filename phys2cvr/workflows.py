@@ -322,6 +322,7 @@ def phys2cvr(
                 'Rerun specifying the TR'
             )
     else:
+        _, _, fname_ext = utils.check_ext(io.EXT_NIMG, fname_func, remove=True)
         try:
             func, dmask, img = io.load_nifti_get_mask(fname_func, dim=4)
         except nib.filebasedimages.ImageFileError:
