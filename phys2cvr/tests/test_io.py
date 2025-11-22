@@ -2,9 +2,13 @@
 """Tests for io."""
 
 import os
+import sys
 
 import nibabel as nib
 import numpy as np
+import pymatreader
+import pytest
+from scipy.io import savemat
 
 from phys2cvr import io
 
@@ -25,6 +29,71 @@ def test_load_nifti_get_mask(nifti_data, nifti_mask):
     assert np.array_equal(data, expected_data)
     assert np.array_equal(mask, expected_data != 0)
     assert isinstance(img, nib.nifti1.Nifti1Image)
+
+
+@pytest.mark.parametrize(
+    'extension, delimieter',
+    [
+        ['.csv', ','],
+        ['.csv.gz', ','],
+        ['.tsv', '\t'],
+        ['.tsv.gz', '\t'],
+        ['.txt', ' '],
+        ['.1d', ' '],
+        ['.par', ' '],
+        ['', ' '],
+    ],
+)
+def test_load_txt(extension, delimiter):
+    """Test load_txt."""
+    a = np.rand(5)
+    n = f'zoe{extension}'
+    np.savetxt(n, a, delimiter=delimiter)
+    b = io.load_txt(n)
+
+    assert (a == b).all()
+    os.remove(n)
+
+
+def test_load_mat():
+    """Test load_mat."""
+    a = np.rand(5)
+    b = 'likealeaf'
+    n = 'inthewind'
+
+    savemat(n, {'data': a, 'other': b})
+
+    c = io.load_mat(n)
+
+    assert (a == c).all()
+    os.remove(n)
+
+
+def test_load_array():
+    """Test load_mat."""
+    a = np.rand(5)
+    b = 'likealeaf'
+    n = 'inthewind'
+    m = 'zoe.txt'
+    np.savetxt(m, a)
+
+    savemat(n, {'data': a, 'other': b})
+
+    d = io.load_array(n)
+    e = io.load_array(m)
+
+    assert (a == d).all()
+    assert (a == e).all()
+    os.remove(n)
+    os.remove(m)
+
+
+def test_load_physio(co2):
+    p = io.load_physio(co2)
+
+    assert isinstance(p[0], np.ndarray)
+    assert isinstance(p[1], np.ndarray)
+    assert isinstance(p[2], float)
 
 
 def test_export_regressor(testdir):
@@ -71,3 +140,26 @@ def test_export_nifti(testdir):
 
 
 # ## Break tests
+def test_break_load_mat():
+    """Break load_mat."""
+    sys.modules['pymatreader'] = None
+    with pytest.raises(ImportError) as errorinfo:
+        io.load_mat('simon')
+    assert 'is required' in str(errorinfo.value)
+    sys.modules['pymatreader'] = pymatreader
+
+    a = 'heart'
+    n = 'ofgold'
+    savemat(n, {'data': a})
+
+    with pytest.raises(EOFError) as errorinfo:
+        io.load_mat(n)
+    assert f'{n} does not seem' in str(errorinfo.value)
+    os.remove(n)
+
+
+def test_break_load_xls():
+    """Break load_xls."""
+    with pytest.raises(NotImplementedError) as errorinfo:
+        io.load_xls('firefly')
+    assert 'loading is not' in str(errorinfo.value)

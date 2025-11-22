@@ -119,6 +119,7 @@ def load_txt(fname, shape=None):
         '.txt': ' ',
         '.1d': ' ',
         '.par': ' ',
+        '': ' ',
     }
 
     mtx = np.genfromtxt(fname, delimiter=delimiter_map.get(ext))
