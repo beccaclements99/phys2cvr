@@ -6,6 +6,7 @@ import sys
 
 import nibabel as nib
 import numpy as np
+import peakdet as pk
 import pymatreader
 import pytest
 from scipy.io import savemat
@@ -46,7 +47,7 @@ def test_load_nifti_get_mask(nifti_data, nifti_mask):
 )
 def test_load_txt(extension, delimiter):
     """Test load_txt."""
-    a = np.rand(5)
+    a = np.random.randn(5)
     n = f'zoe{extension}'
     np.savetxt(n, a, delimiter=delimiter)
     b = io.load_txt(n)
@@ -57,7 +58,7 @@ def test_load_txt(extension, delimiter):
 
 def test_load_mat():
     """Test load_mat."""
-    a = np.rand(5)
+    a = np.random.randn(5)
     b = 'likealeaf'
     n = 'inthewind'
 
@@ -71,7 +72,7 @@ def test_load_mat():
 
 def test_load_array():
     """Test load_mat."""
-    a = np.rand(5)
+    a = np.random.randn(5)
     b = 'likealeaf'
     n = 'inthewind'
     m = 'zoe.txt'
@@ -88,16 +89,21 @@ def test_load_array():
     os.remove(m)
 
 
-def test_load_physio(co2):
-    p = io.load_physio(co2)
+def test_load_physio():
+    d = pk.Physio(np.random.randn(40), fs=10)
+    d = pk.peakfind_physio(d)
+    n = 'kaylee.phys'
+    pk.save_physio(n, d)
+    p = io.load_physio(n)
 
-    assert isinstance(p[0], np.ndarray)
-    assert isinstance(p[1], np.ndarray)
-    assert isinstance(p[2], float)
+    assert (p[0] == d.data).all()
+    assert (p[1] == d.peaks).all()
+    assert p[2] == 10
+    os.remove(n)
 
 
 def test_export_regressor(testdir):
-    petco2hrf_shift = np.random.rand(10)
+    petco2hrf_shift = np.random.randn(10)
     ntp = 10
     outname = os.path.join(testdir, 'test_regressor')
     suffix = 'petco2hrf'
@@ -118,7 +124,7 @@ def test_export_regressor(testdir):
 
 def test_export_nifti(testdir):
     # create some test data
-    data = np.random.rand(10, 10, 10)
+    data = np.random.randn(10, 10, 10)
     affine = np.eye(4)
     header = nib.Nifti1Header()
     img = nib.Nifti1Image(data, affine, header)
@@ -135,6 +141,7 @@ def test_export_nifti(testdir):
     assert np.allclose(out_img.get_fdata(), data, atol=1e-6, rtol=0)
     assert np.allclose(out_img.affine, affine, atol=1e-6, rtol=0)
     assert out_img.header.__dict__.keys() == header.__dict__.keys()
+    os.remove(fname)
     # Eventually check that headers have the same content (although they don't now
     # for good reasons!)
 
@@ -163,3 +170,10 @@ def test_break_load_xls():
     with pytest.raises(NotImplementedError) as errorinfo:
         io.load_xls('firefly')
     assert 'loading is not' in str(errorinfo.value)
+
+
+def test_break_load_xls():
+    """Break load_xls."""
+    with pytest.raises(NotImplementedError) as errorinfo:
+        io.load_array('firefly.leaf')
+    assert 'file extension' in str(errorinfo.value)

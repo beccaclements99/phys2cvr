@@ -269,7 +269,7 @@ def load_physio(fname):
 
 
 def export_regressor(
-    regressors_matrix, ntp, outname, suffix='petco2hrf', ext='.1D', axis=-1
+    regressors_matrix, ntp, outprefix, suffix='petco2hrf', ext='.1D', axis=-1
 ):
     """
     Export generated regressors for fMRI analysis.
@@ -280,7 +280,7 @@ def export_regressor(
         The regressors that needs to be exported, in its original sample
     ntp : int
         The number of fMRI timepoints
-    outname : str or path
+    outprefix : str or path
         Prefix of the output file - can contain a path.
     suffix : str, optional
         The suffix of the output file.
@@ -302,7 +302,7 @@ def export_regressor(
     regressors_demeaned = regressors_matrix - regressors_matrix.mean(
         axis=axis, keepdims=True
     )
-    np.savetxt(f'{outname}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
+    np.savetxt(f'{outprefix}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
     return regressors_demeaned
 
 
