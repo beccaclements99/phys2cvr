@@ -70,7 +70,7 @@ def create_hrf(freq=40):
     u = np.arange(0, p[6] / dt + 1, 1) - p[5] / dt
 
     a1 = p[0] / p[2]
-    b1 = 1 / p[3]
+    b1 = 1 / p[2]
     a2 = p[1] / p[3]
     b2 = 1 / p[3]
 
