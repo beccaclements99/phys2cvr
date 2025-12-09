@@ -33,7 +33,7 @@ def test_load_nifti_get_mask(nifti_data, nifti_mask):
 
 
 @pytest.mark.parametrize(
-    'extension, delimieter',
+    'extension, delimiter',
     [
         ['.csv', ','],
         ['.csv.gz', ','],
@@ -74,7 +74,7 @@ def test_load_array():
     """Test load_mat."""
     a = np.random.randn(5)
     b = 'likealeaf'
-    n = 'inthewind'
+    n = 'inthewind.mat'
     m = 'zoe.txt'
     np.savetxt(m, a)
 
@@ -172,7 +172,7 @@ def test_break_load_xls():
     assert 'loading is not' in str(errorinfo.value)
 
 
-def test_break_load_xls():
+def test_break_load_array():
     """Break load_xls."""
     with pytest.raises(NotImplementedError) as errorinfo:
         io.load_array('firefly.leaf')

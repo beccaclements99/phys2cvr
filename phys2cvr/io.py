@@ -236,10 +236,11 @@ def load_array(fname, shape=''):
     """
     _, _, ext = utils.check_ext(EXT_ARRAY, fname, scan=True, remove=True)
 
-    if ext.lower() in EXT_1D:
-        return load_txt(fname, shape=shape)
-    if ext.lower() in EXT_MAT:
-        return load_mat(fname, shape=shape)
+    if ext:
+        if ext.lower() in EXT_1D:
+            return load_txt(fname, shape=shape)
+        if ext.lower() in EXT_MAT:
+            return load_mat(fname, shape=shape)
 
     raise NotImplementedError(
         f'{fname} file extension {ext} was not found or is not supported yet'
