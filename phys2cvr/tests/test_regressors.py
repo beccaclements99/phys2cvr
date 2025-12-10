@@ -2,7 +2,7 @@
 """Tests for io."""
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -29,15 +29,13 @@ def test_create_legendre():
 )
 @patch('phys2cvr.regressors.plot_two_timeseries')
 @patch('phys2cvr.regressors.convolve_signal', return_value=np.array([9, 8, 7, 6]))
-def test_compute_petco2hrf_basic(mock_conv, mock_plot, mock_endtidal, testdir):
+def test_compute_petco2hrf(mock_conv, mock_plot, mock_endtidal, testdir):
     out = os.path.join(testdir, 'Lune')
     co2 = np.array([1, 2, 3, 4])
     pidx = np.array([0, 2])
     r = regressors.compute_petco2hrf(co2, pidx, 1.0, out)
     assert np.all(r == np.array([9, 8, 7, 6]))
-    os.remove(f'{out}_co2_vs_petco2.png')
     os.remove(f'{out}_petco2.1D')
-    os.remove(f'{out}_petco2_vs_petco2hrf.png')
 
 
 def test_compute_petco2hrf_skip(testdir):
@@ -63,7 +61,6 @@ def test_compute_bulk_shift(mock_plotx, mock_xcorr, testdir):
     assert s == 3
     assert os.path.exists(f'{out}_optshift.1D')
     os.remove(f'{out}_optshift.1D')
-    os.remove(f'{out}_optshift.png')
 
 
 @patch('phys2cvr.regressors.export_regressor', return_value=np.zeros((5, 5)))
@@ -72,7 +69,6 @@ def test_create_fine_shift_regressors(mock_export, testdir):
     pet = np.arange(50.0)
     r = regressors.create_fine_shift_regressors(pet, 3, 2, 1.0, 10, 20, out)
     assert r.shape == (5, 5)
-    os.remove(f'{out}_shifts.1D')
 
 
 @patch('phys2cvr.regressors.export_regressor', return_value=np.zeros((3, 3)))
@@ -81,13 +77,12 @@ def test_create_fine_shift_regressors_padding(mock_export, testdir):
     pet = np.arange(10.0)
     r = regressors.create_fine_shift_regressors(pet, 9, 4, 1.0, 5, 8, out)
     assert r.shape == (3, 3)
-    os.remove(f'{out}_shifts.1D')
 
 
 @patch('phys2cvr.regressors.resample_signal_freqs', return_value=np.arange(20.0))
 @patch('phys2cvr.regressors.plot_two_timeseries')
 @patch('phys2cvr.regressors.export_regressor', return_value=np.arange(10.0))
-def test_create_physio_regressor(mock_exp, mock_plot, mock_bs, mock_res, testdir):
+def test_create_physio_regressor(mock_exp, mock_plot, mock_bs, testdir):
     out = os.path.join(testdir, 'Sciel')
     func = np.arange(10.0)
     pet = np.arange(30.0)
@@ -96,14 +91,11 @@ def test_create_physio_regressor(mock_exp, mock_plot, mock_bs, mock_res, testdir
     )
     assert d.shape == (10,)
     assert lags is not None
-    os.remove(f'{out}_shifts.1D')
-    os.remove(f'{out}_petco2hrf_simple.1D')
-    os.remove(f'{out}_petco2hrf_vs_avgroi.png')
 
 
 @patch('phys2cvr.regressors.resample_signal_freqs', return_value=np.arange(20.0))
 @patch('phys2cvr.regressors.export_regressor', return_value=np.arange(10.0))
-def test_create_physio_regressor_no_lag_max(mock_exp, mock_bs, mock_res, testdir):
+def test_create_physio_regressor_no_lag_max(mock_exp, mock_bs, testdir):
     out = os.path.join(testdir, 'Francois')
     func = np.arange(10.0)
     pet = np.arange(30.0)

@@ -45,10 +45,10 @@ def test_load_nifti_get_mask(nifti_data, nifti_mask):
         ['', ' '],
     ],
 )
-def test_load_txt(extension, delimiter):
+def test_load_txt(extension, delimiter, testdir):
     """Test load_txt."""
     a = np.random.randn(5)
-    n = f'zoe{extension}'
+    n = os.join.path(testdir, f'zoe{extension}')
     np.savetxt(n, a, delimiter=delimiter)
     b = io.load_txt(n)
 
