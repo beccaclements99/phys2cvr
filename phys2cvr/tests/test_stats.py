@@ -9,39 +9,22 @@ from phys2cvr import stats
 
 # ## Unit tests
 def test_x_corr():
-    func = np.array([1.0, 2.0, 3.0])
-    co2 = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    func = np.array([1.0, -2.0, 3.0])
+    co2 = np.array([0.0, 1.0, -2.0, 3.0, 4.0])
 
     # Manually compute expected correlations
-    # sco2 windows: [0,1,2], [1,2,3], [2,3,4]
+    # sco2 windows: [0,1,-2], [1,-2,3], [-2,3,4]
     # zscores:
     # func z: [-1.224745, 0, 1.224745]
     # window z, then dot product / N
     val, idx, arr = stats.x_corr(func, co2)
 
+    sco2 = np.array([[0.0, 1.0, -2.0], [1.0, -2.0, 3.0], [-2.0, 3.0, 4.0]])
     # Pre-computed expected values
-    expected = np.array(
-        [
-            np.dot(
-                (np.array([0.0, 1.0, 2.0]) - 1) / np.sqrt(2),
-                (np.array([1.0, 2.0, 3.0]) - 2) / np.sqrt(2),
-            )
-            / 3,
-            np.dot(
-                (np.array([1.0, 2.0, 3.0]) - 2) / np.sqrt(2),
-                (np.array([1.0, 2.0, 3.0]) - 2) / np.sqrt(2),
-            )
-            / 3,
-            np.dot(
-                (np.array([2.0, 3.0, 4.0]) - 3) / np.sqrt(2),
-                (np.array([1.0, 2.0, 3.0]) - 2) / np.sqrt(2),
-            )
-            / 3,
-        ]
-    )
+    expected = np.corrcoef(func, sco2)[1:, 0]
 
     assert isinstance(val, float)
-    assert isinstance(idx, int)
+    assert isinstance(idx, (int | np.int64 | np.int32))
     assert isinstance(arr, np.ndarray)
     assert arr.shape[0] == co2.size - func.size + 1
     assert np.allclose(arr, expected, atol=1e-6)
@@ -50,14 +33,15 @@ def test_x_corr():
 
     func = np.array([1.0, -2.0, 1.0])
     co2 = np.array([1.0, -1.0, 2.0, -1.0, 1.0])
+    sco2 = np.array([[1, -1, 2], [-1, 2, -1], [2, -1, 1]])
 
     val, idx, arr = stats.x_corr(func, co2, abs_xcorr=True)
-    expected_corr = np.array([0.5, -1.0, 0.5])  # perfectly matches each 3-window
+    expected_corr = np.corrcoef(func, sco2)[1:, 0]
 
     assert val >= 0
     assert arr.size == 3
     assert np.allclose(arr, expected_corr)
-    assert val == -1.0
+    assert val == pytest.approx(expected.max())
     assert idx == 1
 
 

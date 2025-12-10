@@ -2,7 +2,8 @@
 """Tests for io."""
 
 import os
-from unittest.mock import MagicMock, patch
+from pathlib import PosixPath
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -109,7 +110,7 @@ def test_convolve_signal(testdir):
     p = os.path.join(testdir, 'rf.1D')
     np.savetxt(p, np.array([1.0, 2.0, 3.0]))
     x = np.ones(10)
-    with patch('phys2cvr.signal.io.load_array', return_value=np.array([1.0, 2.0, 3.0])):
+    with patch('phys2cvr.io.load_array', return_value=np.array([1.0, 2.0, 3.0])):
         out = signal.convolve_signal(x, 10, response_function=str(p))
     assert out.ndim == 1
 
@@ -150,6 +151,11 @@ def test_break_convolve_signal_invalid_array(testdir):
     p = os.path.join(testdir, 'does_not_exist.1D')
     x = np.ones(10)
     with pytest.raises(OSError):
+        signal.convolve_signal(x, 10, response_function=PosixPath(p))
+
+    p = os.path.join(testdir, 'does_not_exist.1D')
+    x = np.ones(10)
+    with pytest.raises(NotImplementedError):
         signal.convolve_signal(x, 10, response_function=str(p))
 
     x = np.ones(10)
