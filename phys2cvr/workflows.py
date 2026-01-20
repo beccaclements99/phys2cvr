@@ -451,13 +451,16 @@ def phys2cvr(
 
         _, basename_co2, _ = utils.check_ext(
             io.EXT_ALL, os.path.basename(fname_co2), scan=True, remove=True
-        )[1]
+        )
 
         outprefix = os.path.join(outdir, basename_co2)
 
-        petco2hrf = compute_petco2hrf(
-            co2, pidx, freq, outprefix, comp_endtidal, response_function
-        )
+        if comp_endtidal:
+            petco2hrf = compute_petco2hrf(
+                co2, pidx, freq, outprefix, comp_endtidal, response_function
+            )
+        else: 
+            petco2hrf=co2
 
     # If a regressor dir is specified, try load the data,
     # If failing or otherwise, compute the regressors.
