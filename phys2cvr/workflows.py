@@ -459,8 +459,8 @@ def phys2cvr(
             petco2hrf = compute_petco2hrf(
                 co2, pidx, freq, outprefix, comp_endtidal, response_function
             )
-        else: 
-            petco2hrf=co2
+        else:
+            petco2hrf = co2
 
     # If a regressor dir is specified, try load the data,
     # If failing or otherwise, compute the regressors.
