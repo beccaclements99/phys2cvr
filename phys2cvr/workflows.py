@@ -476,6 +476,39 @@ def phys2cvr(
             regr_dir = None
 
     if regr_dir is None:
+        if lag_map:
+            lag, _, _ = io.load_nifti_get_mask(lag_map)
+            if func.shape[:3] != lag.shape:
+                raise ValueError(
+                    f'{lag_map} and {fname_func} have different sizes!'
+                )
+
+            # Read lag_step and lag_max from file (or try to)
+            lag = lag * mask
+            
+            lag_list = np.unique(lag[mask > 0])
+
+            if lag_step is None:
+                lag_step = np.unique(np.round(lag_list[1:] - lag_list[:-1],3))
+                if lag_step.size > 1:
+                    raise ValueError(
+                        f'phys2cvr found different delta lags in {lag_map}'
+                    )
+                else:
+                    lag_step=lag_step[0]
+                    LGR.warning(
+                        f'phys2cvr detected a delta lag of {lag_step} seconds'
+                    )
+            else:
+                LGR.warning(f'Forcing delta lag to be {lag_step}')
+
+            step = int(lag_step * freq)
+
+            if lag_max is None:
+                lag_max = np.abs(lag_list).max()
+                LGR.warning(f'phys2cvr detected a max lag of {lag_max} seconds')
+            else:
+                LGR.warning(f'Forcing max lag to be {lag_max}')
         regr, regr_shifts = create_physio_regressor(
             func_avg,
             petco2hrf,
@@ -601,61 +634,27 @@ def phys2cvr(
 
             # If user specified a lag map, use that one to regress things
             if lag_map:
-                lag, _, _ = io.load_nifti_get_mask(lag_map)
-                if func.shape[:3] != lag.shape:
-                    raise ValueError(
-                        f'{lag_map} and {fname_func} have different sizes!'
-                    )
 
-                # Read lag_step and lag_max from file (or try to)
-                lag = lag * mask
-
-                lag_list = np.unique(lag)
-
-                if lag_step is None:
-                    lag_step = np.unique(lag_list[1:] - lag_list[:-1])
-                    if lag_step.size > 1:
-                        raise ValueError(
-                            f'phys2cvr found different delta lags in {lag_map}'
-                        )
-                    else:
-                        LGR.warning(
-                            f'phys2cvr detected a delta lag of {lag_step} seconds'
-                        )
-                else:
-                    LGR.warning(f'Forcing delta lag to be {lag_step}')
-
-                step = int(lag_step * freq)
-
-                if lag_max is None:
-                    lag_max = np.abs(lag_list).max()
-                    LGR.warning(f'phys2cvr detected a max lag of {lag_max} seconds')
-                else:
-                    LGR.warning(f'Forcing max lag to be {lag_max}')
-
-                lag_idx = (lag + lag_max) * freq / step
-
-                lag_idx_list = np.unique[lag_idx]
-
+                lag_idx = np.round((lag + lag_max) * freq / step).astype(int)
+                lag_idx_list = np.unique(lag_idx)
+                
                 # Prepare empty matrices
                 beta = np.empty_like(lag, dtype='float32')
                 tstat = np.empty_like(lag, dtype='float32')
-
-                for i in lag_idx_list:
-                    LGR.info(
-                        f'Perform L-GLM for lag {lag_list[i]} ({i + 1} of '
-                        f'{len(lag_idx_list)}'
-                    )
+                
+                for index, i in enumerate(lag_idx_list):
+                    LGR.info(f'Perform L-GLM number {index + 1} of {len(lag_idx_list)}')
                     regr = regr_shifts[(i * step), :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
+                    
                     (beta[lag_idx == i], tstat[lag_idx == i], _) = stats.regression(
                         func[lag_idx == i],
                         regr,
                         denoise_matrix,
                         orthogonalised_matrix,
                         extra_matrix,
-                        [lag_idx == i],
+                        [lag_idx == i][0],
                         r2model,
                         debug,
                         x1D,
@@ -768,7 +767,7 @@ if __name__ == '__main__':
 
 
 """
-Copyright 2021-2025, Stefano Moia & phys2cvr contributors.
+Copyright 2021, Stefano Moia.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
