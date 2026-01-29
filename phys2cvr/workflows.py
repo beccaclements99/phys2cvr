@@ -654,7 +654,7 @@ def phys2cvr(
                         denoise_matrix,
                         orthogonalised_matrix,
                         extra_matrix,
-                        [lag_idx == i][0],
+                        mask[lag_idx == i],
                         r2model,
                         debug,
                         x1D,
@@ -760,11 +760,6 @@ def _main(argv=None):
     utils.save_bash_call(options.fname_func, options.outdir)
 
     phys2cvr(**vars(options))
-
-
-if __name__ == '__main__':
-    _main(sys.argv[1:])
-
 
 
 if __name__ == '__main__':
