@@ -479,26 +479,22 @@ def phys2cvr(
         if lag_map:
             lag, _, _ = io.load_nifti_get_mask(lag_map)
             if func.shape[:3] != lag.shape:
-                raise ValueError(
-                    f'{lag_map} and {fname_func} have different sizes!'
-                )
+                raise ValueError(f'{lag_map} and {fname_func} have different sizes!')
 
             # Read lag_step and lag_max from file (or try to)
             lag = lag * mask
-            
+
             lag_list = np.unique(lag[mask > 0])
 
             if lag_step is None:
-                lag_step = np.unique(np.round(lag_list[1:] - lag_list[:-1],3))
+                lag_step = np.unique(np.round(lag_list[1:] - lag_list[:-1], 3))
                 if lag_step.size > 1:
                     raise ValueError(
                         f'phys2cvr found different delta lags in {lag_map}'
                     )
                 else:
-                    lag_step=lag_step[0]
-                    LGR.warning(
-                        f'phys2cvr detected a delta lag of {lag_step} seconds'
-                    )
+                    lag_step = lag_step[0]
+                    LGR.warning(f'phys2cvr detected a delta lag of {lag_step} seconds')
             else:
                 LGR.warning(f'Forcing delta lag to be {lag_step}')
 
@@ -634,20 +630,19 @@ def phys2cvr(
 
             # If user specified a lag map, use that one to regress things
             if lag_map:
-
                 lag_idx = np.round((lag + lag_max) * freq / step).astype(int)
                 lag_idx_list = np.unique(lag_idx)
-                
+
                 # Prepare empty matrices
                 beta = np.empty_like(lag, dtype='float32')
                 tstat = np.empty_like(lag, dtype='float32')
-                
+
                 for index, i in enumerate(lag_idx_list):
                     LGR.info(f'Perform L-GLM number {index + 1} of {len(lag_idx_list)}')
                     regr = regr_shifts[(i * step), :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
-                    
+
                     (beta[lag_idx == i], tstat[lag_idx == i], _) = stats.regression(
                         func[lag_idx == i],
                         regr,
