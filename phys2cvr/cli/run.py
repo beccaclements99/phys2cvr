@@ -480,13 +480,28 @@ def _get_parser():
         dest='lag_max',
         type=float,
         help=(
-            'Maximum lag to consider during lag regression in seconds. The same lag '
-            'will be considered in both directions.\nDespite the code being python, the '
-            'upper limit is included in the computation. E.g. -lm 9 -ls .3 means '
-            '[-9, +9] (61 regressors).'
+            'Maximum (most positive) lag to consider during lag regression in seconds. '
+            'If --lag-min is not specified, the same lag will be considered in both '
+            'directions (symmetric range).\n'
+            'Despite the code being python, the upper limit is included in the computation. '
+            'E.g., -lm 9 -ls .3 means [-9, +9] (61 regressors). '
+            'E.g., -lmin -6 -lm 9 -ls .3 means [-6, +9] (51 regressors).'
         ),
         default=None,
     )
+    opt_lreg.add_argument(
+        '-lmin',
+        '--lag-min',
+        dest='lag_min',
+        type=float,
+        help=(
+            'Minimum (most negative) lag to consider during lag regression in seconds. '
+            'If not specified, defaults to -lag_max (symmetric range).\n'
+            'Use this to specify asymmetric lag ranges. E.g., -lmin -6 -lm 9 -ls .3 '
+            'means [-6, +9] (51 regressors).'
+        ),
+        default=None,
+        )
     opt_lreg.add_argument(
         '-ls',
         '--lag-step',
@@ -686,6 +701,8 @@ def _check_opt_conf(parser):
                 'In fact, you should not see this message at all.'
             )
 
+    if parser.lag_min is None  and parser.lag_max is not None:
+        parser.lag_min = -1*float(parser.lag_max)
     if parser.r2model is None:
         parser.r2model = 'full'
 
