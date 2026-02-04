@@ -501,7 +501,7 @@ def _get_parser():
             'means [-6, +9] (51 regressors).'
         ),
         default=None,
-        )
+    )
     opt_lreg.add_argument(
         '-ls',
         '--lag-step',
@@ -701,8 +701,8 @@ def _check_opt_conf(parser):
                 'In fact, you should not see this message at all.'
             )
 
-    if parser.lag_min is None  and parser.lag_max is not None:
-        parser.lag_min = -1*float(parser.lag_max)
+    if parser.lag_min is None and parser.lag_max is not None:
+        parser.lag_min = -1 * float(parser.lag_max)
     if parser.r2model is None:
         parser.r2model = 'full'
 

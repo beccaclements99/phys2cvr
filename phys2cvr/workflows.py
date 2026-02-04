@@ -310,7 +310,7 @@ def phys2cvr(
     l_degree = utils.if_declared_force_type(l_degree, 'int', 'l_degree')
     if lag_min >= lag_max:
         raise ValueError(
-            f"Invalid lag range: lag_min ({lag_min}) >= lag_max ({lag_max})"
+            f'Invalid lag range: lag_min ({lag_min}) >= lag_max ({lag_max})'
         )
     if l_degree < 0:
         raise ValueError(
@@ -513,7 +513,7 @@ def phys2cvr(
 
             if lag_max is None:
                 lag_max = np.asarray(lag_list).max()
-                lag_min= np.asarray(lag_list).min()
+                lag_min = np.asarray(lag_list).min()
                 LGR.warning(f'phys2cvr detected a lag range of [{lag_min}, {lag_max}]')
             else:
                 LGR.warning(f'Forcing lag range to be [{lag_min}, {lag_max}]')
