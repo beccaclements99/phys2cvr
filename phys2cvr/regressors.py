@@ -230,6 +230,7 @@ def create_fine_shift_regressors(
     petco2hrf,
     optshift,
     lag_max,
+    lag_min,
     freq,
     func_size,
     func_upsamp_size,
@@ -249,6 +250,8 @@ def create_fine_shift_regressors(
     lag_max : int or float, optional
         Limits (both positive and negative) of the temporal area to explore,
         expressed in seconds.
+    lag_min : int or float
+        Lower limit of the temporal area to explore, expressed in seconds.
     freq : str, int, or float
         Sample frequency of petco2hrf
     func_size : int
@@ -273,22 +276,22 @@ def create_fine_shift_regressors(
     os.makedirs(regr_dir, exist_ok=True)
     outprefix = os.path.join(regr_dir, base)
 
-    neg_shifts = int(lag_max * freq)
-    pos_shifts = neg_shifts if legacy else neg_shifts + 1
+    neg_shifts = int(abs(lag_min) * freq)
+    pos_shifts = int(lag_max * freq) if legacy else int(lag_max * freq) + 1
 
     # Padding regressor right for shifts if not enough timepoints
     # Padding regressor left for shifts and update optshift if less than neg_shifts.
     rpad = max(0, func_upsamp_size + optshift + pos_shifts - petco2hrf.shape[0])
     lpad = max(0, neg_shifts - optshift)
-
+    print(f'lpad = {lpad}')
+    print(f'rpad = {rpad}')
     petco2hrf = np.pad(petco2hrf, (int(lpad), int(rpad)), 'mean')
 
     # Create sliding window view into petco2hrf, -1 because of reversed indexing
-    neg_idx = optshift - neg_shifts + lpad - 1
-    pos_idx = optshift + pos_shifts + lpad - 1
+    neg_idx = optshift - pos_shifts + lpad - 1
+    pos_idx = optshift + neg_shifts + lpad - 1
     # select the right windows the other way round
     petco2hrf_lagged = swv(petco2hrf, func_upsamp_size)[pos_idx:neg_idx:-1].copy()
-
     petco2hrf_lagged = export_regressor(
         petco2hrf_lagged, func_size, outprefix, 'shifts', ext
     )
@@ -302,6 +305,7 @@ def create_physio_regressor(
     freq,
     outprefix,
     lag_max=None,
+    lag_min=None,
     trial_len=None,
     n_trials=None,
     ext='.1D',
@@ -329,6 +333,9 @@ def create_physio_regressor(
         Limits (both positive and negative) for the estimated temporal lag,
         expressed in seconds.
         Default: 9 (i.e., -9 to +9 seconds)
+    lag_min : int or float, optional
+        Lower limit for the estimated temporal lag, expressed in seconds.
+        Default: -lag_max
     trial_len : str or int, optional
         Length of each individual trial for timeseries which include more than one trial
         (e.g., multiple BreathHold trials, trials within CO2 challenges, ...)
@@ -394,6 +401,7 @@ def create_physio_regressor(
             petco2hrf,
             optshift,
             lag_max,
+            lag_min,
             freq,
             func_avg.shape[-1],
             func_upsampled.shape[-1],
@@ -426,3 +434,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
