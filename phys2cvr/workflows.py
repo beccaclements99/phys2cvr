@@ -49,6 +49,7 @@ def phys2cvr(
     run_regression=False,
     lagged_regression=True,
     r2model='full',
+    lag_min=None,
     lag_max=None,
     lag_step=None,
     legacy=False,
@@ -148,10 +149,14 @@ def phys2cvr(
         will change results with orthogonalisations.
         See `stats.ols` help for more details.
         Default: `full`
+    lag_min : int or float, optional
+        Lower limit of the temporal area to explore, expressed in seconds.
+        Caution: this is not a pythonic range, but a real range, i.e. the lower limit is included.
+        If None, defaults to -lag_max (symmetric range).
+        Default: -lag_max
     lag_max : int or float, optional
-        Limits (both positive and negative) of the temporal area to explore,
-        expressed in seconds (e.g. ±9 seconds). Caution: this is not a pythonic
-        range, but a real range, i.e. the upper limit is included (e.g. [-9, +9]).
+        Upper limit of the temporal area to explore, expressed in seconds.
+        Caution: this is not a pythonic range, but a real range, i.e. the upper limit is included.
         Default: None
     lag_step : int or float, optional
         Step of the lag to take into account in seconds.
@@ -298,9 +303,15 @@ def phys2cvr(
     n_trials = utils.if_declared_force_type(n_trials, 'int', 'n_trials')
     highcut = utils.if_declared_force_type(highcut, 'float', 'highcut')
     lowcut = utils.if_declared_force_type(lowcut, 'float', 'lowcut')
+    lowcut = utils.if_declared_force_type(lowcut, 'float', 'lowcut')
+    lag_min = utils.if_declared_force_type(lag_min, 'float', 'lag_min')
     lag_max = utils.if_declared_force_type(lag_max, 'float', 'lag_max')
     lag_step = utils.if_declared_force_type(lag_step, 'float', 'lag_step')
     l_degree = utils.if_declared_force_type(l_degree, 'int', 'l_degree')
+    if lag_min >= lag_max:
+        raise ValueError(
+            f"Invalid lag range: lag_min ({lag_min}) >= lag_max ({lag_max})"
+        )
     if l_degree < 0:
         raise ValueError(
             'The specified order of the Legendre polynomials must be >= 0.'
@@ -501,10 +512,11 @@ def phys2cvr(
             step = int(lag_step * freq)
 
             if lag_max is None:
-                lag_max = np.abs(lag_list).max()
-                LGR.warning(f'phys2cvr detected a max lag of {lag_max} seconds')
+                lag_max = np.asarray(lag_list).max()
+                lag_min= np.asarray(lag_list).min()
+                LGR.warning(f'phys2cvr detected a lag range of [{lag_min}, {lag_max}]')
             else:
-                LGR.warning(f'Forcing max lag to be {lag_max}')
+                LGR.warning(f'Forcing lag range to be [{lag_min}, {lag_max}]')
         regr, regr_shifts = create_physio_regressor(
             func_avg,
             petco2hrf,
@@ -512,6 +524,7 @@ def phys2cvr(
             freq,
             outprefix,
             lag_max,
+            lag_min,
             trial_len,
             n_trials,
             '.1D',
@@ -615,7 +628,7 @@ def phys2cvr(
         ):
             if lag_max:
                 LGR.info(
-                    f'Running lagged CVR estimation with max lag = {lag_max}! '
+                    f'Running lagged CVR estimation with lag range = [{lag_min}, {lag_max}]! '
                     '(might take a while...)'
                 )
             elif lag_map is not None:
@@ -624,9 +637,13 @@ def phys2cvr(
                     '(might take a while...)'
                 )
             if legacy:
-                nrep = int(lag_max * freq * 2)
+                nrep_neg = int(abs(lag_min) * freq)
+                nrep_pos = int(abs(lag_max) * freq)
+                nrep = nrep_neg + nrep_pos
             else:
-                nrep = int(lag_max * freq * 2) + 1
+                nrep_neg = int(abs(lag_min) * freq)
+                nrep_pos = int(abs(lag_max) * freq)
+                nrep = nrep_neg + nrep_pos + 1
 
             # If user specified a lag map, use that one to regress things
             if lag_map:
@@ -714,7 +731,7 @@ def phys2cvr(
 
                 # Find the right lag for CVR estimation
                 lag_idx = np.argmax(r_square_all, axis=-1)
-                lag = (lag_idx * step) / freq - (mask * lag_max)
+                lag = (lag_idx * step) / freq + (mask * lag_min)
                 # Express lag map relative to median of the roi
                 lag_rel = lag - (mask * np.median(lag[roi]))
 
