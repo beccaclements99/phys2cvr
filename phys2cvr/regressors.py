@@ -281,10 +281,9 @@ def create_fine_shift_regressors(
 
     # Padding regressor right for shifts if not enough timepoints
     # Padding regressor left for shifts and update optshift if less than neg_shifts.
-    rpad = max(0, func_upsamp_size + optshift + pos_shifts - petco2hrf.shape[0])
-    lpad = max(0, neg_shifts - optshift)
-    print(f'lpad = {lpad}')
-    print(f'rpad = {rpad}')
+    rpad = max(0, int(func_upsamp_size + optshift + neg_shifts - petco2hrf.shape[0]))
+    lpad = max(0, int(pos_shifts - optshift + 1))
+
     petco2hrf = np.pad(petco2hrf, (int(lpad), int(rpad)), 'mean')
 
     # Create sliding window view into petco2hrf, -1 because of reversed indexing
