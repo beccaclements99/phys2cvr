@@ -100,7 +100,7 @@ def compute_petco2hrf(
             'Arrays with more than 2 dimensions are not supported.'
         )
 
-    if comp_endtidal:
+    if comp_endtidal and pidx is not None:
         petco2 = endtidal_interpolation(co2, pidx, axis=-1)
 
         # Plot PetCO2 vs CO2
@@ -111,6 +111,10 @@ def compute_petco2hrf(
         # Demean and export
         petco2 = petco2 - petco2.mean()
         np.savetxt(f'{outprefix}_petco2.1D', petco2, fmt='%.18f')
+    elif pidx is None:
+        raise ValueError(
+            'End-tidal interpolation was requested, but peaks were not provided.'
+        )
     else:
         LGR.info(
             'Skipping End Tidal interpolation of PetCO2 trace (if you provided raw CO2 '

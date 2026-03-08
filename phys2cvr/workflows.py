@@ -427,6 +427,9 @@ def phys2cvr(
                     'file containing its peaks was provided. '
                     ' Please provide peak file!'
                 )
+            else:
+                # pidx to None for compatibility
+                pidx = None
 
             if freq is None:
                 raise NameError(
@@ -451,7 +454,7 @@ def phys2cvr(
 
         _, basename_co2, _ = utils.check_ext(
             io.EXT_ALL, os.path.basename(fname_co2), scan=True, remove=True
-        )[1]
+        )
 
         outprefix = os.path.join(outdir, basename_co2)
 
