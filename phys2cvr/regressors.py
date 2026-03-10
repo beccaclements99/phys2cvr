@@ -111,7 +111,7 @@ def compute_petco2hrf(
         # Demean and export
         petco2 = petco2 - petco2.mean()
         np.savetxt(f'{outprefix}_petco2.1D', petco2, fmt='%.18f')
-    elif pidx is None:
+    elif comp_endtidal and pidx is None:
         raise ValueError(
             'End-tidal interpolation was requested, but peaks were not provided.'
         )
