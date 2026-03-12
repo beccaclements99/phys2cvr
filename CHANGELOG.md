@@ -1,3 +1,38 @@
+# 0.28.3 (Thu Mar 12 2026)
+
+:tada: This release contains work from a new contributor! :tada:
+
+Thank you, Becca Clements ([@beccaclements99](https://github.com/beccaclements99)), for all your work!
+
+#### 🐛 Bug Fix
+
+- Fix usage of previously computed lag maps to run a (new) lagged regression [#154](https://github.com/smoia/phys2cvr/pull/154) ([@beccaclements99](https://github.com/beccaclements99) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]) [@smoia](https://github.com/smoia))
+- Give an error message if peaks are not provided AND comp_endtidal is True [#156](https://github.com/smoia/phys2cvr/pull/156) ([@beccaclements99](https://github.com/beccaclements99))
+
+#### ⚠️ Pushed to `master`
+
+- tests: Reorganise tests, remove or mark xfails the failing ones ([@smoia](https://github.com/smoia))
+- docs: update licenses ([@smoia](https://github.com/smoia))
+- docs: Fix logos ([@smoia](https://github.com/smoia))
+
+#### ⚠️ Tests
+
+- Fix workflow halting on missing peaks when they are not required (i.e. when skipping end-tidal convolution) [#153](https://github.com/smoia/phys2cvr/pull/153) ([@smoia](https://github.com/smoia) [@beccaclements99](https://github.com/beccaclements99) [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
+
+#### 🏠 Internal
+
+- [pre-commit.ci] pre-commit autoupdate [#152](https://github.com/smoia/phys2cvr/pull/152) ([@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot]))
+- Bump actions/checkout from 5 to 6 [#151](https://github.com/smoia/phys2cvr/pull/151) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+
+#### Authors: 4
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- [@pre-commit-ci[bot]](https://github.com/pre-commit-ci[bot])
+- Becca Clements ([@beccaclements99](https://github.com/beccaclements99))
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.28.2 (Wed Nov 19 2025)
 
 #### 🐛 Bug Fix
