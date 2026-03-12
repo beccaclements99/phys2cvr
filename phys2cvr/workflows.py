@@ -427,6 +427,9 @@ def phys2cvr(
                     'file containing its peaks was provided. '
                     ' Please provide peak file!'
                 )
+            else:
+                # pidx to None for compatibility
+                pidx = None
 
             if freq is None:
                 raise NameError(
