@@ -20,7 +20,7 @@ phys2cvr
 [![Supports python version](https://img.shields.io/pypi/pyversions/phys2cvr?style=shield&logo=python)](https://pypi.org/project/phys2cvr/)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A python-based tool to generate regressor for and/or estimate CVR maps and their lag.
@@ -92,7 +92,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <tr>
       <td align="center" valign="top" width="20%"><a href="https://github.com/smoia"><img src="https://avatars3.githubusercontent.com/u/35300580?v=4?s=100" width="100px;" alt="Stefano Moia"/><br /><sub><b>Stefano Moia</b></sub></a><br /><a href="https://github.com/smoia/phys2cvr/commits?author=smoia" title="Code">💻</a> <a href="#ideas-smoia" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-smoia" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#projectManagement-smoia" title="Project Management">📆</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/kristinazvolanek"><img src="https://avatars3.githubusercontent.com/u/54590158?v=4?s=100" width="100px;" alt="Kristina Zvolanek"/><br /><sub><b>Kristina Zvolanek</b></sub></a><br /><a href="https://github.com/smoia/phys2cvr/commits?author=kristinazvolanek" title="Code">💻</a> <a href="https://github.com/smoia/phys2cvr/issues?q=author%3Akristinazvolanek" title="Bug reports">🐛</a> <a href="#infra-kristinazvolanek" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/beccaclements99"><img src="https://avatars.githubusercontent.com/u/95257798?v=4?s=100" width="100px;" alt="Becca Clements"/><br /><sub><b>Becca Clements</b></sub></a><br /><a href="https://github.com/smoia/phys2cvr/issues?q=author%3Abeccaclements99" title="Bug reports">🐛</a> <a href="https://github.com/smoia/phys2cvr/commits?author=beccaclements99" title="Code">💻</a> <a href="#userTesting-beccaclements99" title="User Testing">📓</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/avigotsky"><img src="https://avatars.githubusercontent.com/u/904218?v=4?s=100" width="100px;" alt="Andrew Vigotsky"/><br /><sub><b>Andrew Vigotsky</b></sub></a><br /><a href="https://github.com/smoia/phys2cvr/commits?author=avigotsky" title="Code">💻</a></td>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/ccomellalue"><img src="https://avatars.githubusercontent.com/u/209748720?v=4?s=100" width="100px;" alt="ccomellalue"/><br /><sub><b>ccomellalue</b></sub></a><br /><a href="https://github.com/smoia/phys2cvr/commits?author=ccomellalue" title="Code">💻</a> <a href="#ideas-ccomellalue" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
+    <tr>
       <td align="center" valign="top" width="20%"><a href="https://github.com/merelvdthiel"><img src="https://avatars.githubusercontent.com/u/72999546?v=4?s=100" width="100px;" alt="merelvdthiel"/><br /><sub><b>merelvdthiel</b></sub></a><br /><a href="https://github.com/smoia/phys2cvr/commits?author=merelvdthiel" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/RazkinMalen"><img src="https://avatars.githubusercontent.com/u/147508933?v=4?s=100" width="100px;" alt="razkin"/><br /><sub><b>razkin</b></sub></a><br /><a href="#design-RazkinMalen" title="Design">🎨</a> <a href="https://github.com/smoia/phys2cvr/commits?author=RazkinMalen" title="Documentation">📖</a> <a href="https://github.com/smoia/phys2cvr/commits?author=RazkinMalen" title="Tests">⚠️</a></td>
     </tr>

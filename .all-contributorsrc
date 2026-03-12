@@ -30,12 +30,33 @@
       ]
     },
     {
+      "login": "beccaclements99",
+      "name": "Becca Clements",
+      "avatar_url": "https://avatars.githubusercontent.com/u/95257798?v=4",
+      "profile": "https://github.com/beccaclements99",
+      "contributions": [
+        "bug",
+        "code",
+        "userTesting"
+      ]
+    },
+    {
       "login": "avigotsky",
       "name": "Andrew Vigotsky",
       "avatar_url": "https://avatars.githubusercontent.com/u/904218?v=4",
       "profile": "https://github.com/avigotsky",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "ccomellalue",
+      "name": "ccomellalue",
+      "avatar_url": "https://avatars.githubusercontent.com/u/209748720?v=4",
+      "profile": "https://github.com/ccomellalue",
+      "contributions": [
+        "code",
+        "ideas"
       ]
     },
     {
