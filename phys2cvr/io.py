@@ -119,6 +119,7 @@ def load_txt(fname, shape=None):
         '.txt': ' ',
         '.1d': ' ',
         '.par': ' ',
+        '': ' ',
     }
 
     mtx = np.genfromtxt(fname, delimiter=delimiter_map.get(ext))
@@ -235,10 +236,11 @@ def load_array(fname, shape=''):
     """
     _, _, ext = utils.check_ext(EXT_ARRAY, fname, scan=True, remove=True)
 
-    if ext.lower() in EXT_1D:
-        return load_txt(fname, shape=shape)
-    if ext.lower() in EXT_MAT:
-        return load_mat(fname, shape=shape)
+    if ext:
+        if ext.lower() in EXT_1D:
+            return load_txt(fname, shape=shape)
+        if ext.lower() in EXT_MAT:
+            return load_mat(fname, shape=shape)
 
     raise NotImplementedError(
         f'{fname} file extension {ext} was not found or is not supported yet'
@@ -268,7 +270,7 @@ def load_physio(fname):
 
 
 def export_regressor(
-    regressors_matrix, ntp, outname, suffix='petco2hrf', ext='.1D', axis=-1
+    regressors_matrix, ntp, outprefix, suffix='petco2hrf', ext='.1D', axis=-1
 ):
     """
     Export generated regressors for fMRI analysis.
@@ -279,7 +281,7 @@ def export_regressor(
         The regressors that needs to be exported, in its original sample
     ntp : int
         The number of fMRI timepoints
-    outname : str or path
+    outprefix : str or path
         Prefix of the output file - can contain a path.
     suffix : str, optional
         The suffix of the output file.
@@ -301,7 +303,7 @@ def export_regressor(
     regressors_demeaned = regressors_matrix - regressors_matrix.mean(
         axis=axis, keepdims=True
     )
-    np.savetxt(f'{outname}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
+    np.savetxt(f'{outprefix}_{suffix}{ext}', regressors_demeaned, fmt='%.6f')
     return regressors_demeaned
 
 

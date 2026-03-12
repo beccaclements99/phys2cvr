@@ -11,19 +11,18 @@ from phys2cvr import utils
 # ## Unit tests
 
 
-@pytest.mark.xfail(strict=False, reason="Something's off with lists")
 @pytest.mark.parametrize(
     'var, dtype, out',
     [
         (10, 'int', 10),
         (10.0, 'int', 10),
         ('10', 'int', 10),
-        ([10], 'int', [10]),
+        ([10], 'int', 10),
         (None, 'int', None),
         (10, 'float', 10.0),
         (10.0, 'float', 10.0),
         ('10.0', 'float', 10.0),
-        ([10.0], 'float', [10.0]),
+        ([10.0], 'float', 10.0),
         (None, 'float', None),
         (10, 'str', '10'),
         (10.0, 'str', '10.0'),
@@ -106,6 +105,19 @@ def test_break_if_declared_force_type():
     with pytest.raises(NotImplementedError) as errorinfo:
         utils.if_declared_force_type('10', 'invalid_type')
     assert 'not supported' in str(errorinfo.value)
+
+
+# Check this one
+@pytest.mark.parametrize(
+    'var, dtype',
+    [
+        ([10], 'int'),
+        ([10.0], 'float'),
+    ],
+)
+def test_if_declared_force_type_errors(var, dtype):
+    with pytest.raises(TypeError):
+        utils.if_declared_force_type(var, dtype)
 
 
 @pytest.mark.xfail(strict=False, reason='Message changed')
