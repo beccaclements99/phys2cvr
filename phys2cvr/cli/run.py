@@ -701,7 +701,7 @@ if __name__ == '__main__':
 
 
 """
-Copyright 2021-2025, Stefano Moia & phys2cvr contributors.
+Copyright 2021-2026, Stefano Moia & phys2cvr contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
