@@ -311,6 +311,7 @@ def phys2cvr(
             f'R^2 model {r2model} not supported. Supported models are {stats.R2MODEL}'
         )
 
+    LGR.info('Load functional data')
     if func_is_1d:
         if tr:
             func_avg = io.load_array(fname_func)
@@ -345,6 +346,7 @@ def phys2cvr(
 
         # Read mask (and mask func) if provided
         if fname_mask:
+            LGR.info('Load mask to restrict operations on functional data')
             _, mask, _ = io.load_nifti_get_mask(fname_mask, is_mask=True)
             if func.shape[:3] != mask.shape:
                 raise ValueError(f'{fname_mask} and {fname_func} have different sizes!')
@@ -364,6 +366,7 @@ def phys2cvr(
 
         # Read roi if provided
         if fname_roi:
+            LGR.info('Load ROI to obtain a reference from functional data')
             _, roi, _ = io.load_nifti_get_mask(fname_roi, is_mask=True)
             if func.shape[:3] != roi.shape:
                 raise ValueError(f'{fname_roi} and {fname_func} have different sizes!')
@@ -382,6 +385,7 @@ def phys2cvr(
             LGR.info(f'Obtaining filtered average signal in {roiref}')
             func_avg = signal.filter_signal(func_avg, tr, lowcut, highcut, butter_order)
 
+    LGR.info('Load physiological data')
     if fname_co2 is None:
         LGR.info(f'Computing "CVR" (approximation) maps using {fname_func} only')
         if func_is_1d:
@@ -462,6 +466,39 @@ def phys2cvr(
         else:
             petco2hrf = co2
 
+    # If the user provided a lag map, read it and extract information from it
+    if lag_map:
+        LGR.info('Load lag map')
+        lag, _, _ = io.load_nifti_get_mask(lag_map)
+        if func.shape[:3] != lag.shape:
+            raise ValueError(f'{lag_map} and {fname_func} have different sizes!')
+
+        # Read lag_step and lag_max from file (or try to)
+        lag = lag * mask
+
+        lag_list = np.unique(lag[mask])
+
+        if lag_step is None:
+            # np.unique sorts results already
+            lag_step = np.unique(np.round(lag_list[1:] - lag_list[:-1], 3))
+            if lag_step.size > 1:
+                # Check if extra steps found are multiple of the first within numerical tolerance
+                if not np.isclose(np.mod(lag_step, lag_step[0]), 0).all():
+                    raise ValueError(
+                        f'phys2cvr found different delta lags in {lag_map}: {lag_step}'
+                    )
+
+            lag_step = lag_step[0]
+            LGR.warning(f'phys2cvr detected a delta lag of {lag_step} seconds')
+        else:
+            LGR.warning(f'Forcing delta lag to be {lag_step}')
+
+        if lag_max is None:
+            lag_max = np.abs(lag_list).max()
+            LGR.warning(f'phys2cvr detected a max lag of {lag_max} seconds')
+        else:
+            LGR.warning(f'Forcing max lag to be {lag_max}')
+
     # If a regressor dir is specified, try load the data,
     # If failing or otherwise, compute the regressors.
     if run_regression and regr_dir is not None:
@@ -476,35 +513,6 @@ def phys2cvr(
             regr_dir = None
 
     if regr_dir is None:
-        if lag_map:
-            lag, _, _ = io.load_nifti_get_mask(lag_map)
-            if func.shape[:3] != lag.shape:
-                raise ValueError(f'{lag_map} and {fname_func} have different sizes!')
-
-            # Read lag_step and lag_max from file (or try to)
-            lag = lag * mask
-
-            lag_list = np.unique(lag[mask > 0])
-
-            if lag_step is None:
-                lag_step = np.unique(np.round(lag_list[1:] - lag_list[:-1], 3))
-                if lag_step.size > 1:
-                    raise ValueError(
-                        f'phys2cvr found different delta lags in {lag_map}'
-                    )
-                else:
-                    lag_step = lag_step[0]
-                    LGR.warning(f'phys2cvr detected a delta lag of {lag_step} seconds')
-            else:
-                LGR.warning(f'Forcing delta lag to be {lag_step}')
-
-            step = int(lag_step * freq)
-
-            if lag_max is None:
-                lag_max = np.abs(lag_list).max()
-                LGR.warning(f'phys2cvr detected a max lag of {lag_max} seconds')
-            else:
-                LGR.warning(f'Forcing max lag to be {lag_max}')
         regr, regr_shifts = create_physio_regressor(
             func_avg,
             petco2hrf,
@@ -608,28 +616,16 @@ def phys2cvr(
                 r_square, oimg, f'{fname_out_func}_r_square_simple{fname_ext}'
             )
 
-        if (
-            lagged_regression
-            and regr_shifts is not None
-            and ((lag_max and lag_step) or lag_map)
-        ):
-            if lag_max:
-                LGR.info(
-                    f'Running lagged CVR estimation with max lag = {lag_max}! '
-                    '(might take a while...)'
-                )
-            elif lag_map is not None:
+        if lagged_regression and regr_shifts is not None and (lag_max and lag_step):
+            # If user specified a lag map, run regression based on it (see "Load lag map")
+            if lag_map is not None:
                 LGR.info(
                     f'Running lagged CVR estimation with lag map {lag_map}! '
                     '(might take a while...)'
                 )
-            if legacy:
-                nrep = int(lag_max * freq * 2)
-            else:
-                nrep = int(lag_max * freq * 2) + 1
 
-            # If user specified a lag map, use that one to regress things
-            if lag_map:
+                step = int(lag_step * freq)
+
                 lag_idx = np.round((lag + lag_max) * freq / step).astype(int)
                 lag_idx_list = np.unique(lag_idx)
 
@@ -637,8 +633,8 @@ def phys2cvr(
                 beta = np.empty_like(lag, dtype='float32')
                 tstat = np.empty_like(lag, dtype='float32')
 
-                for index, i in enumerate(lag_idx_list):
-                    LGR.info(f'Perform L-GLM number {index + 1} of {len(lag_idx_list)}')
+                for n, i in enumerate(lag_idx_list):
+                    LGR.info(f'Perform L-GLM number {n + 1} of {len(lag_idx_list)}')
                     regr = regr_shifts[(i * step), :, np.newaxis]
 
                     x1D = os.path.join(outdir, 'mat', f'mat_{i:04g}.1D')
@@ -656,6 +652,16 @@ def phys2cvr(
                     )
 
             else:
+                LGR.info(
+                    f'Running lagged CVR estimation with max lag = {lag_max}! '
+                    '(might take a while...)'
+                )
+
+                if legacy:
+                    nrep = int(lag_max * freq * 2)
+                else:
+                    nrep = int(lag_max * freq * 2) + 1
+
                 # Check the number of repetitions first
                 if lag_step:
                     step = int(lag_step * freq)
