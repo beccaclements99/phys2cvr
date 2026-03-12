@@ -311,6 +311,7 @@ def phys2cvr(
             f'R^2 model {r2model} not supported. Supported models are {stats.R2MODEL}'
         )
 
+    LGR.info('Load functional data')
     if func_is_1d:
         if tr:
             func_avg = io.load_array(fname_func)
@@ -345,6 +346,7 @@ def phys2cvr(
 
         # Read mask (and mask func) if provided
         if fname_mask:
+            LGR.info('Load mask to restrict operations on functional data')
             _, mask, _ = io.load_nifti_get_mask(fname_mask, is_mask=True)
             if func.shape[:3] != mask.shape:
                 raise ValueError(f'{fname_mask} and {fname_func} have different sizes!')
@@ -364,6 +366,7 @@ def phys2cvr(
 
         # Read roi if provided
         if fname_roi:
+            LGR.info('Load ROI to obtain a reference from functional data')
             _, roi, _ = io.load_nifti_get_mask(fname_roi, is_mask=True)
             if func.shape[:3] != roi.shape:
                 raise ValueError(f'{fname_roi} and {fname_func} have different sizes!')
@@ -382,6 +385,7 @@ def phys2cvr(
             LGR.info(f'Obtaining filtered average signal in {roiref}')
             func_avg = signal.filter_signal(func_avg, tr, lowcut, highcut, butter_order)
 
+    LGR.info('Load physiological data')
     if fname_co2 is None:
         LGR.info(f'Computing "CVR" (approximation) maps using {fname_func} only')
         if func_is_1d:
