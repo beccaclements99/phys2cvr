@@ -1,3 +1,19 @@
+# 0.28.4 (Fri Mar 13 2026)
+
+#### 🐛 Bug Fix
+
+- fix: Fix unnecessary skip reintroduced in merging PR #154 ([@smoia](https://github.com/smoia))
+
+#### 📝 Documentation
+
+- Update authorship and licencing [#157](https://github.com/smoia/phys2cvr/pull/157) ([@smoia](https://github.com/smoia))
+
+#### Authors: 1
+
+- Stefano Moia ([@smoia](https://github.com/smoia))
+
+---
+
 # 0.28.3 (Thu Mar 12 2026)
 
 :tada: This release contains work from a new contributor! :tada:
