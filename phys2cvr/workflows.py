@@ -462,12 +462,9 @@ def phys2cvr(
 
         outprefix = os.path.join(outdir, basename_co2)
 
-        if comp_endtidal:
-            petco2hrf = compute_petco2hrf(
-                co2, pidx, freq, outprefix, comp_endtidal, response_function
-            )
-        else:
-            petco2hrf = co2
+        petco2hrf = compute_petco2hrf(
+            co2, pidx, freq, outprefix, comp_endtidal, response_function
+        )
 
     # If the user provided a lag map, read it and extract information from it
     if lag_map:
