@@ -471,7 +471,7 @@ def phys2cvr(
 
         petco2hrf = compute_petco2hrf(
             co2, pidx, freq, outprefix, comp_endtidal, response_function
-            )
+        )
     # If the user provided a lag map, read it and extract information from it
     if lag_map:
         LGR.info('Load lag map')
@@ -504,7 +504,6 @@ def phys2cvr(
             LGR.warning(f'phys2cvr detected a lag range of [{lag_min}, {lag_max}]')
         else:
             LGR.warning(f'Forcing lag range to be [{lag_min}, {lag_max}]')
-
 
     # If a regressor dir is specified, try load the data,
     # If failing or otherwise, compute the regressors.
