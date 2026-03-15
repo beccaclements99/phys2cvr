@@ -393,7 +393,7 @@ def phys2cvr(
         if apply_filter:
             LGR.info(f'Obtaining filtered average signal in {roiref}')
             func_avg = signal.filter_signal(func_avg, tr, lowcut, highcut, butter_order)
-L   LGR.info('Load physiological data')
+    LGR.info('Load physiological data')
     if fname_co2 is None:
         LGR.info(f'Computing "CVR" (approximation) maps using {fname_func} only')
         if func_is_1d:
