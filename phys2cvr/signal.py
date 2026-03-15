@@ -70,7 +70,7 @@ def create_hrf(freq=40):
     u = np.arange(0, p[6] / dt + 1, 1) - p[5] / dt
 
     a1 = p[0] / p[2]
-    b1 = 1 / p[3]
+    b1 = 1 / p[2]
     a2 = p[1] / p[3]
     b2 = 1 / p[3]
 
@@ -325,7 +325,7 @@ def resample_signal_freqs(ts, freq1, freq2, axis=-1):
 
 
 """
-Copyright 2021-2025, Stefano Moia & phys2cvr contributors.
+Copyright 2021-2026, Stefano Moia & phys2cvr contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
