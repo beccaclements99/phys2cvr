@@ -303,7 +303,6 @@ def phys2cvr(
     n_trials = utils.if_declared_force_type(n_trials, 'int', 'n_trials')
     highcut = utils.if_declared_force_type(highcut, 'float', 'highcut')
     lowcut = utils.if_declared_force_type(lowcut, 'float', 'lowcut')
-    lowcut = utils.if_declared_force_type(lowcut, 'float', 'lowcut')
     lag_min = utils.if_declared_force_type(lag_min, 'float', 'lag_min')
     lag_max = utils.if_declared_force_type(lag_max, 'float', 'lag_max')
     lag_step = utils.if_declared_force_type(lag_step, 'float', 'lag_step')
