@@ -662,6 +662,7 @@ def phys2cvr(
                 LGR.info(
                     f'Running lagged CVR estimation with lag range = [{lag_min}, {lag_max}]! '
                     '(might take a while...)'
+                )
                 if legacy:
                     nrep_neg = int(abs(lag_min) * freq)
                     nrep_pos = int(abs(lag_max) * freq)
