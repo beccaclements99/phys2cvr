@@ -230,6 +230,8 @@ def phys2cvr(
             functional nifti file.
         - If a lag map was specified, lag_step was not, and the lag map seems
             to have different lag_steps inside.
+        - If the maximum lag is 0 or negative and no minimum lag is provided
+        - If a minimum lag is provided and no maximum lag is provided
     NotImplementedError
         - If a file type is not supported yet.
     NameError
