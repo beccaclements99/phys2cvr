@@ -476,9 +476,9 @@ def _get_parser():
     opt_lreg = parser.add_argument_group('Optional Arguments for the lagged regression')
     opt_lreg.add_argument(
         '-lm',
-'-lmax',
-'--lag-max',
-'-lm',
+        '-lmax',
+        '--lag-max',
+        '-lm',
         dest='lag_max',
         type=float,
         help=(
@@ -706,7 +706,9 @@ def _check_opt_conf(parser):
         if parser.lag_max > 0:
             parser.lag_min = -1 * float(parser.lag_max)
         else:
-            raise ValueError('Given max lag max is negative, but no min lag was provided. Halting execution.')  
+            raise ValueError(
+                'Given max lag max is negative, but no min lag was provided. Halting execution.'
+            )
     if parser.r2model is None:
         parser.r2model = 'full'
 
