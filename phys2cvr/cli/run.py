@@ -484,7 +484,7 @@ def _get_parser():
         help=(
             'Maximum (i.e. latest) lag to consider during lag regression, expressed in seconds. '
             'If `-lmin` is not specified, the opposite value will be considered as minimum (i.e. earliest) lag.\n'
-            'Despite the code being python, the upper limit is included in the computation. '
+            'The two limits (positive and negative) are both included in the computation.'
             'E.g., -lm 9 -ls .3 means [-9, +9] (61 regressors). '
             'E.g., -lmin -6 -lm 9 -ls .3 means [-6, +9] (51 regressors).'
         ),
