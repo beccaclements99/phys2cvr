@@ -49,8 +49,8 @@ def phys2cvr(
     run_regression=False,
     lagged_regression=True,
     r2model='full',
-    lag_min=None,
     lag_max=None,
+    lag_min=None,
     lag_step=None,
     legacy=False,
     l_degree=0,
@@ -303,8 +303,8 @@ def phys2cvr(
     n_trials = utils.if_declared_force_type(n_trials, 'int', 'n_trials')
     highcut = utils.if_declared_force_type(highcut, 'float', 'highcut')
     lowcut = utils.if_declared_force_type(lowcut, 'float', 'lowcut')
-    lag_min = utils.if_declared_force_type(lag_min, 'float', 'lag_min')
     lag_max = utils.if_declared_force_type(lag_max, 'float', 'lag_max')
+    lag_min = utils.if_declared_force_type(lag_min, 'float', 'lag_min')
     lag_step = utils.if_declared_force_type(lag_step, 'float', 'lag_step')
     l_degree = utils.if_declared_force_type(l_degree, 'int', 'l_degree')
     if lag_min >= lag_max:

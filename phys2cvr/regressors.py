@@ -252,8 +252,7 @@ def create_fine_shift_regressors(
     optshift : int
         The index shift computed by the Xcorr/bulk shift
     lag_max : int or float, optional
-        Limits (both positive and negative) of the temporal area to explore,
-        expressed in seconds.
+       Higher limit of the temporal area to explore, expressed in seconds.
     lag_min : int or float
         Lower limit of the temporal area to explore, expressed in seconds.
     freq : str, int, or float
