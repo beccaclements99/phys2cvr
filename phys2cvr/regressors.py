@@ -294,6 +294,7 @@ def create_fine_shift_regressors(
     pos_idx = optshift + neg_shifts + lpad - 1
     # select the right windows the other way round
     petco2hrf_lagged = swv(petco2hrf, func_upsamp_size)[pos_idx:neg_idx:-1].copy()
+    
     petco2hrf_lagged = export_regressor(
         petco2hrf_lagged, func_size, outprefix, 'shifts', ext
     )
