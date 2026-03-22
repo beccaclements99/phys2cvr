@@ -232,6 +232,7 @@ def phys2cvr(
             to have different lag_steps inside.
         - If the maximum lag is 0 or negative and no minimum lag is provided
         - If a minimum lag is provided and no maximum lag is provided
+        - If the minimum lag is greater than or equal to the maximum lag
     NotImplementedError
         - If a file type is not supported yet.
     NameError
