@@ -483,7 +483,7 @@ def _get_parser():
         type=float,
         help=(
             'Maximum (i.e. latest) lag to consider during lag regression, expressed in seconds. '
-            'If `-lmin` is not specified, the opposite value will be considered as minimum (i.e. earnest) lag.\n'
+            'If `-lmin` is not specified, the opposite value will be considered as minimum (i.e. earliest) lag.\n'
             'Despite the code being python, the upper limit is included in the computation. '
             'E.g., -lm 9 -ls .3 means [-9, +9] (61 regressors). '
             'E.g., -lmin -6 -lm 9 -ls .3 means [-6, +9] (51 regressors).'
@@ -496,8 +496,8 @@ def _get_parser():
         dest='lag_min',
         type=float,
         help=(
-            'minimum (i.e. earnest) lag to consider during lag regression, expressed in seconds. '
-            'If not specified, defaults to -lag_max (symmetric range).\n'
+            'Minimum (i.e. earliest) lag to consider during lag regression, expressed in seconds. '
+            'If not specified, it will be the opposite value of `lmax`, so the considered lag range will be symmetric around the coarse temporal realignemnt.\n'
             'Use this to specify asymmetric lag ranges. E.g., -lmin -6 -lm 9 -ls .3 '
             'means [-6, +9] (51 regressors).'
         ),
