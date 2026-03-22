@@ -149,16 +149,16 @@ def phys2cvr(
         will change results with orthogonalisations.
         See `stats.ols` help for more details.
         Default: `full`
-    lag_min : int or float, optional
+    lag_min : int, float, or None, optional
         Lower limit of the temporal area to explore, expressed in seconds.
         Caution: this is not a pythonic range, but a real range, i.e. the lower limit is included.
-        If None, defaults to -lag_max (symmetric range).
-        Default: -lag_max
-    lag_max : int or float, optional
+        If set to None, and lag_max is not None, lag_min defaults to -lag_max (symmetric range).
+        Default: None
+    lag_max : int, float, or None, optional
         Upper limit of the temporal area to explore, expressed in seconds.
         Caution: this is not a pythonic range, but a real range, i.e. the upper limit is included.
         Default: None
-    lag_step : int or float, optional
+    lag_step : int, float, or None, optional
         Step of the lag to take into account in seconds.
         Default: None
     legacy : bool, optional
