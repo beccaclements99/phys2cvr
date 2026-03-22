@@ -281,7 +281,7 @@ def create_fine_shift_regressors(
     outprefix = os.path.join(regr_dir, base)
 
     neg_shifts = int(abs(lag_min) * freq)
-    pos_shifts = int(lag_max * freq) if legacy else int(lag_max * freq) + 1
+    pos_shifts = int(abs(lag_max) * freq) if legacy else int(abs(lag_max) * freq) + 1
 
     # Padding regressor right for shifts if not enough timepoints
     # Padding regressor left for shifts and update optshift if less than neg_shifts.
