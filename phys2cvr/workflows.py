@@ -323,6 +323,7 @@ def phys2cvr(
         raise ValueError(
             f'R^2 model {r2model} not supported. Supported models are {stats.R2MODEL}'
         )
+        
     LGR.info('Load functional data')
     if func_is_1d:
         if tr:
@@ -396,6 +397,7 @@ def phys2cvr(
         if apply_filter:
             LGR.info(f'Obtaining filtered average signal in {roiref}')
             func_avg = signal.filter_signal(func_avg, tr, lowcut, highcut, butter_order)
+            
     LGR.info('Load physiological data')
     if fname_co2 is None:
         LGR.info(f'Computing "CVR" (approximation) maps using {fname_func} only')
@@ -445,6 +447,7 @@ def phys2cvr(
             else:
                 # pidx to None for compatibility
                 pidx = None
+                
             if freq is None:
                 raise NameError(
                     f'{fname_co2} file is a text file, but no '
@@ -475,6 +478,7 @@ def phys2cvr(
         petco2hrf = compute_petco2hrf(
             co2, pidx, freq, outprefix, comp_endtidal, response_function
         )
+        
     # If the user provided a lag map, read it and extract information from it
     if lag_map:
         LGR.info('Load lag map')
@@ -497,6 +501,7 @@ def phys2cvr(
                         f'phys2cvr found different delta lags in {lag_map}: {lag_step}'
                     )
             lag_step = lag_step[0]
+            
             LGR.warning(f'phys2cvr detected a delta lag of {lag_step} seconds')
         else:
             LGR.warning(f'Forcing delta lag to be {lag_step}')
@@ -635,6 +640,7 @@ def phys2cvr(
                 )
 
                 step = int(lag_step * freq)
+                
                 lag_idx = np.round((lag + lag_max) * freq / step).astype(int)
                 lag_idx_list = np.unique(lag_idx)
 
@@ -665,6 +671,7 @@ def phys2cvr(
                     f'Running lagged CVR estimation with lag range = [{lag_min}, {lag_max}]! '
                     '(might take a while...)'
                 )
+                
                 if legacy:
                     nrep_neg = int(abs(lag_min) * freq)
                     nrep_pos = int(abs(lag_max) * freq)
