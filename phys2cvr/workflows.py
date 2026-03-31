@@ -312,7 +312,7 @@ def phys2cvr(
     l_degree = utils.if_declared_force_type(l_degree, 'int', 'l_degree')
     if lag_max is not None and lag_min >= lag_max:
         raise ValueError(
-            f'Invalid lag range: lag_min ({lag_min}) >= lag_max ({lag_max})'
+            f'Invalid lag range: lag_min ({lag_min}) >= lag_max ({lag_max}). Please provide a range where lag_min < lag_max.'
         )
     if l_degree < 0:
         raise ValueError(
