@@ -251,10 +251,14 @@ def create_fine_shift_regressors(
         Regressor of interest
     optshift : int
         The index shift computed by the Xcorr/bulk shift
-    lag_max : int or float, optional
-       Higher limit of the temporal area to explore, expressed in seconds.
-    lag_min : int or float
+    lag_max : int, float, or None, optional
+        Upper limit of the temporal area to explore, expressed in seconds.
+        Caution: this is not a pythonic range, but a real range, i.e. the upper limit is included.
+        Default: None
+    lag_min : int, float, or None, optional
         Lower limit of the temporal area to explore, expressed in seconds.
+        If set to None, and lag_max is not None and is positive, lag_min defaults to -lag_max (symmetric range).
+        Default: None
     freq : str, int, or float
         Sample frequency of petco2hrf
     func_size : int
@@ -332,13 +336,14 @@ def create_physio_regressor(
         Sample frequency of petco2hrf
     outprefix : list or path
         Path to output directory for computed regressors.
-    lag_max : int or float, optional
-        Limits (both positive and negative) for the estimated temporal lag,
-        expressed in seconds.
-        Default: 9 (i.e., -9 to +9 seconds)
-    lag_min : int or float, optional
-        Lower limit for the estimated temporal lag, expressed in seconds.
-        Default: -lag_max
+    lag_max : int, float, or None, optional
+        Upper limit of the temporal area to explore, expressed in seconds.
+        Caution: this is not a pythonic range, but a real range, i.e. the upper limit is included.
+        Default: None
+    lag_min : int, float, or None, optional
+        Lower limit of the temporal area to explore, expressed in seconds.
+        If set to None, and lag_max is not None and is positive, lag_min defaults to -lag_max (symmetric range).
+        Default: None
     trial_len : str or int, optional
         Length of each individual trial for timeseries which include more than one trial
         (e.g., multiple BreathHold trials, trials within CO2 challenges, ...)
