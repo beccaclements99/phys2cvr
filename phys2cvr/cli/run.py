@@ -495,7 +495,7 @@ def _get_parser():
         type=float,
         help=(
             'Minimum (i.e. earliest) lag to consider during lag regression, expressed in seconds. '
-            'If not specified, it will be the opposite value of `lmax`, so the considered lag range will be symmetric around the coarse temporal realignemnt.\n'
+            'If not specified and `lmax` is positive, it will be the opposite value of `lmax`, so the considered lag range will be symmetric around the coarse temporal realignment.\n'
             'Use this to specify asymmetric lag ranges. E.g., -lmin -6 -lm 9 -ls .3 '
             'means [-6, +9] (51 regressors).'
         ),
