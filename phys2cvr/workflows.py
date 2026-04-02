@@ -640,7 +640,7 @@ def phys2cvr(
 
                 step = int(lag_step * freq)
 
-                lag_idx = np.round((lag + lag_max) * freq / step).astype(int)
+                lag_idx = np.round((lag - lag_min) * freq / step).astype(int)
                 lag_idx_list = np.unique(lag_idx)
 
                 # Prepare empty matrices
