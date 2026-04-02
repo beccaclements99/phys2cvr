@@ -155,7 +155,7 @@ def phys2cvr(
         Default: None
     lag_min : int, float, or None, optional
         Lower limit of the temporal area to explore, expressed in seconds.
-        If set to None, and lag_max is not None, lag_min defaults to -lag_max (symmetric range).
+        If set to None, and lag_max is not None and is positive, lag_min defaults to -lag_max (symmetric range).
         Default: None
     lag_step : int, float, or None, optional
         Step of the lag to take into account in seconds.
