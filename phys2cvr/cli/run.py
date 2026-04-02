@@ -705,7 +705,7 @@ def _check_opt_conf(parser):
             parser.lag_min = -1 * float(parser.lag_max)
         else:
             raise ValueError(
-                'Given maximum lag is negative, but no minimum lag was provided. Halting execution.'
+                'Given maximum lag is 0 or negative, but no minimum lag was provided. Halting execution.'
             )
 
     if parser.lag_max is None and parser.lag_min is not None:
