@@ -709,7 +709,9 @@ def _check_opt_conf(parser):
             )
 
     if parser.lag_max is None and parser.lag_min is not None:
-        raise ValueError('A minimum lag was provided without providing a maximum lag. Please rerun providing both or none.')
+        raise ValueError(
+            'A minimum lag was provided without providing a maximum lag. Please rerun providing both or none.'
+        )
 
     if parser.r2model is None:
         parser.r2model = 'full'
