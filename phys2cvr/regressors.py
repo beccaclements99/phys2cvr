@@ -276,8 +276,24 @@ def create_fine_shift_regressors(
     Returns
     -------
     petco2hrf_lagged : np.ndarray
-        The shifted versions of the regresosr of interest.
+        The shifted versions of the regressor of interest.
     """
+    if lag_max is not None and lag_min is None:
+        if lag_max>0:
+            lag_min = -lag_max
+        else:
+            raise ValueError(
+                'Given maximum lag is 0 or negative, but no minimum lag was provided. Halting execution.'
+            )
+            
+    if lag_max is None and lag_min is not None:
+        raise ValueError('A minimum lag was provided without providing a maximum lag. Please rerun providing both or none.')
+        
+    if lag_max is not None and lag_min >= lag_max:
+        raise ValueError(
+            f'Invalid lag range: lag_min ({lag_min}) >= lag_max ({lag_max}). Please provide a range where lag_min < lag_max.'
+        )
+        
     outdir, base = os.path.split(outprefix)
     regr_dir = os.path.join(outdir, 'regr')
     os.makedirs(regr_dir, exist_ok=True)
